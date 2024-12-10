@@ -86,6 +86,9 @@
 #include "utl/Logger.h"
 #include "utl/MakeLogger.h"
 #include "utl/ScopedTemporaryFile.h"
+// MY CODE
+#include "sta/ConcreteLibrary.hh"
+#include "sta/PortDirection.hh"
 
 namespace sta {
 extern const char* openroad_swig_tcl_inits[];
@@ -1129,4 +1132,392 @@ void OpenRoad::dumpDbModule(odb::dbModule* mod, int hier)
     dumpDbModule(child->getMaster(), hier + 1);
   }
 }
+
+void OpenRoad::dumpNetwork(sta::ConcreteNetwork* network)
+{
+  std::string group;
+  std::string message;
+
+  if (network == getVerilogNetwork()) {
+    group = "dumpVerilogNetwork";
+    message = "================VerilogNetwork================";
+  } else if (network == getDbNetwork()) {
+    group = "dumpDbNetwork";
+    message = "================dbNetwork================";
+  }
+
+  debugPrint(logger_, utl::ODB, group.c_str(), 1, message.c_str());
+  // statistic of VerilogNetwork
+
+  if (network->topInstance()) {
+    debugPrint(logger_,
+               utl::ODB,
+               group.c_str(),
+               1,
+               "inst: {}, pin: {}, net: {}, leafInst: {}, leafPin: {}",
+               network->instanceCount(),
+               network->pinCount(),
+               network->netCount(),
+               network->leafInstanceCount(),
+               network->leafPinCount());
+
+    auto libIt = network->libraryIterator();
+    while (libIt->hasNext()) {
+      auto lib = libIt->next();
+      debugPrint(logger_,
+                 utl::ODB,
+                 group.c_str(),
+                 1,
+                 "library: {}",
+                 network->name(lib));
+    }
+
+    auto libertyLibIt = network->libertyLibraryIterator();
+    while (libertyLibIt->hasNext()) {
+      auto lib = libertyLibIt->next();
+      auto clib = reinterpret_cast<sta::ConcreteLibrary*>(lib);
+      debugPrint(logger_,
+                 utl::ODB,
+                 group.c_str(),
+                 1,
+                 "libertyLibrary: {}",
+                 clib->filename());
+    }
+  } else {
+    logger_->warn(utl::ODB, 8000, "empty dbVerilogNetwork");
+  }
+
+  debugPrint(logger_, utl::ODB, group.c_str(), 1, message.c_str());
+
+  dumpInstFromNetwork(network, network->topInstance(), 0, group);
+}
+
+void OpenRoad::dumpInstFromNetwork(sta::ConcreteNetwork* network,
+                                   sta::Instance* inst,
+                                   int hierLevel,
+                                   std::string& group)
+{
+  if (inst == nullptr && hierLevel == 0) {
+    logger_->warn(utl::ODB, 8001, "no instance in network");
+    return;
+  }
+  if (inst == nullptr) {
+    return;
+  }
+  std::string baseIndent;
+  for (int i = 0; i < hierLevel; ++i) {
+    baseIndent.append("\t");
+  }
+  // dump top instance
+  if (hierLevel == 0) {
+    debugPrint(logger_,
+               utl::ODB,
+               group.c_str(),
+               1,
+               "{}top instance: {}, cell: {}, hierLevel: {}, subInst: {}, pin: "
+               "{}, net: {}",
+               baseIndent,
+               network->pathName(inst),
+               network->cellName(inst),
+               hierLevel,
+               network->instanceCount(inst),
+               network->pinCount(inst),
+               network->netCount(inst));
+    // pin
+    dumpPinOfInstance(network, inst, hierLevel, group);
+    // net
+    dumpNetOfInstance(network, inst, hierLevel, group);
+    // dump children
+    auto childIt = network->childIterator(inst);
+    while (childIt->hasNext()) {
+      dumpInstFromNetwork(network, childIt->next(), hierLevel + 1, group);
+    }
+  } else {  // dump module instance or leaf instance
+    debugPrint(logger_,
+               utl::ODB,
+               group.c_str(),
+               1,
+               "{} instance: {}, cell: {}, hierLevel: {}, subInst: {}, pin: "
+               "{}, net: {}",
+               baseIndent,
+               network->pathName(inst),
+               network->cellName(inst),
+               hierLevel,
+               network->instanceCount(inst),
+               network->pinCount(inst),
+               network->netCount(inst));
+    // pin, pinNet, term, termNet
+    dumpPinOfInstance(network, inst, hierLevel, group);
+    // net
+    dumpNetOfInstance(network, inst, hierLevel, group);
+    // dump children
+    auto childIt = network->childIterator(inst);
+    while (childIt->hasNext()) {
+      dumpInstFromNetwork(network, childIt->next(), hierLevel + 1, group);
+    }
+  }
+}
+
+void OpenRoad::dumpPinOfInstance(sta::ConcreteNetwork* network,
+                                 sta::Instance* inst,
+                                 int hierLevel,
+                                 std::string& group)
+{
+  std::string baseIndent;
+  for (int i = 0; i < hierLevel; ++i) {
+    baseIndent.append("\t");
+  }
+  // port
+  // cell
+  auto cell = network->cell(inst);
+  // cell->port
+  auto portIt = network->portIterator(cell);
+  while (portIt->hasNext()) {
+    auto port = portIt->next();
+    debugPrint(logger_,
+               utl::ODB,
+               group.c_str(),
+               1,
+               "{}\t port: {}, isBus: {}",
+               baseIndent,
+               network->name(port),
+               network->isBus(port));
+  }
+
+  auto pinIt = network->pinIterator(inst);
+  while (pinIt->hasNext()) {
+    sta::Pin* pin = pinIt->next();
+    debugPrint(logger_,
+               utl::ODB,
+               group.c_str(),
+               1,
+               "{}\t pin: {}, dir: {}",
+               baseIndent,
+               network->pathName(pin),
+               network->direction(pin)->name());
+
+    // get net from pin
+    auto pinNet = network->net(pin);
+    // pinNet may not excist
+    if (pinNet) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 group.c_str(),
+                 1,
+                 "{}\t\t PinNet: {}",
+                 baseIndent,
+                 network->pathName(pinNet));
+    } else {
+      debugPrint(logger_,
+                 utl::ODB,
+                 group.c_str(),
+                 1,
+                 "{}\t\t pin {} does not connected to net",
+                 baseIndent,
+                 network->pathName(pin));
+    }
+
+    // get term from pin
+    sta::Term* term = network->term(pin);
+    // term may not exist
+    if (term) {
+      sta::Net* termNet = network->net(term);
+      if (termNet) {
+        debugPrint(logger_,
+                   utl::ODB,
+                   group.c_str(),
+                   1,
+                   "{}\t\t TermNet: {}",
+                   baseIndent,
+                   network->pathName(termNet));
+      }
+      // get pin from this term net
+      auto termNetPinIt = network->pinIterator(termNet);
+      while (termNetPinIt->hasNext()) {
+        auto termNetPin = termNetPinIt->next();
+        if (termNetPin) {
+          debugPrint(logger_,
+                     utl::ODB,
+                     group.c_str(),
+                     1,
+                     "{}\t\t\t TermNetPin: {}",
+                     baseIndent,
+                     network->pathName(termNetPin));
+        }
+      }
+    }
+  }
+}
+
+void OpenRoad::dumpNetOfInstance(sta::ConcreteNetwork* network,
+                                 sta::Instance* inst,
+                                 int hierLevel,
+                                 std::string& group)
+{
+  std::string baseIndent;
+  for (int i = 0; i < hierLevel; ++i) {
+    baseIndent.append("\t");
+  }
+  auto netIt = network->netIterator(inst);
+  while (netIt->hasNext()) {
+    sta::Net* net = netIt->next();
+    debugPrint(logger_,
+               utl::ODB,
+               group.c_str(),
+               1,
+               "{}\t net: {}",
+               baseIndent,
+               network->pathName(net));
+    // get pin from net
+    auto pinIt = network->pinIterator(net);
+    while (pinIt->hasNext()) {
+      auto pin = pinIt->next();
+      debugPrint(logger_,
+                 utl::ODB,
+                 group.c_str(),
+                 1,
+                 "{}\t\t pin: {}, dir: {}",
+                 baseIndent,
+                 network->pathName(pin),
+                 network->direction(pin)->name());
+    }
+    // get term from net
+    auto termIt = network->termIterator(net);
+    while (termIt->hasNext()) {
+      auto term = termIt->next();
+      debugPrint(logger_,
+                 utl::ODB,
+                 group.c_str(),
+                 1,
+                 "{}\t\t term: {}",
+                 baseIndent,
+                 network->pathName(term));
+    }
+  }
+}
+
+void OpenRoad::dumpTechLibs()
+{
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpPDK",
+             1,
+             "================dumpPDKs================");
+
+  auto odb = getDb();
+
+  // auto tech = odb->getTech();  // getTech() is obsolete in a multi-tech db
+  // debugPrint(logger_,
+  //            utl::ODB,
+  //            "dumpPDK",
+  //            1,
+  //            "dbTech: {}, version:{}, layer: {}, routingLayer: {}, via:
+  //            {}", tech->getName(), tech->getLefVersionStr(),
+  //            tech->getLayerCount(),
+  //            tech->getRoutingLayerCount(),
+  //            tech->getViaCount());
+
+  // Tech Level
+  for (auto tech : odb->getTechs()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpPDK",
+               1,
+               "dbTech: {}, version:{}, layer: {}, routingLayer: {}, via: {}, "
+               "UnitsPerMicron: {}",
+               tech->getName(),
+               tech->getLefVersionStr(),
+               tech->getLayerCount(),
+               tech->getRoutingLayerCount(),
+               tech->getViaCount(),
+               tech->getDbUnitsPerMicron());
+  }
+
+  // Lib Level
+  for (auto lib : odb->getLibs()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpPDK",
+               1,
+               "dbLib: {}, getTech: {}, lefUnits: {}, master: {}",
+               lib->getName(),
+               lib->getTech()->getName(),
+               lib->getLefUnits(),
+               lib->getMasters().size());
+
+    // lib -> master
+    for (auto master : lib->getMasters()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpPDK",
+                 1,
+                 "dbMaster: {}, Id: {}, area: {}, height: {}, width: {}, "
+                 "isCoreAutoPlaceable: {}",
+                 master->getName(),
+                 master->getMasterId(),
+                 master->getArea(),
+                 master->getHeight(),
+                 master->getWidth(),
+                 master->getMTermCount(),
+                 master->isCoreAutoPlaceable());
+    }
+  }
+
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpPDK",
+             1,
+             "================dumpPDKs================");
+}
+
+void OpenRoad::dumpRegionGroups()
+{
+  dbBlock* block = getDb()->getChip()->getBlock();
+  for (odb::dbRegion* region : block->getRegions()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpRegion",
+               1,
+               "dbRegion: {}, type: {}, regionInsts: {}",
+               region->getName(),
+               region->getRegionType().getString(),
+               region->getRegionInsts().size());
+    // instance in this region
+    for (auto inst : region->getRegionInsts()) {
+      debugPrint(
+          logger_, utl::ODB, "dumpRegion", 1, "\tdbInst: {}", inst->getName());
+    }
+    // group in this region
+    for (auto group : region->getGroups()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpRegion",
+                 1,
+                 "dbGroup: {}, parentGroup: {}, region: {}",
+                 group->getName(),
+                 group->getParentGroup() ? group->getParentGroup()->getName()
+                                         : "empty",
+                 group->getRegion()->getName());
+      // get mod instnce in group
+      for (auto modInst : group->getModInsts()) {
+        debugPrint(logger_,
+                   utl::ODB,
+                   "dumpRegion",
+                   1,
+                   "\tdbInst: {}",
+                   modInst->getName());
+      }
+      // get instance in group
+      for (auto inst : region->getRegionInsts()) {
+        debugPrint(logger_,
+                   utl::ODB,
+                   "dumpRegion",
+                   1,
+                   "\tdbInst: {}",
+                   inst->getName());
+      }
+    }
+  }
+}
+
 }  // namespace ord

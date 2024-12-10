@@ -527,9 +527,25 @@ proc parse_list_args { cmd arg_var list_var lists_args } {
   }
 }
 
-// MY CODE
+# MY CODE
 proc dump_db { } {
   ord::dump_db_cmd
+}
+
+proc dump_db_verilog_network { } {
+  ord::dump_db_verilog_network_cmd
+}
+
+proc dump_db_network { } {
+  ord::dump_db_network_cmd
+}
+
+proc dump_pdk { } {
+  ord::dump_pdk_cmd
+}
+
+proc dump_region_group { } {
+  ord::dump_region_group_cmd
 }
 
 # namespace ord

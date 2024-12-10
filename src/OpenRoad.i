@@ -638,4 +638,32 @@ dump_db_cmd()
   ord->dumpDb();
 }
 
+void
+dump_db_verilog_network_cmd()
+{
+  OpenRoad *ord = getOpenRoad();
+  ord->dumpNetwork(ord->getVerilogNetwork());
+}
+
+void
+dump_db_network_cmd()
+{
+  OpenRoad *ord = getOpenRoad();
+  ord->dumpNetwork(ord->getDbNetwork());
+}
+
+void
+dump_pdk_cmd()
+{
+  OpenRoad *ord = getOpenRoad();
+  ord->dumpTechLibs();
+}
+
+void
+dump_region_group_cmd()
+{
+  OpenRoad *ord = getOpenRoad();
+  ord->dumpRegionGroups();
+}
+
 %} // inline

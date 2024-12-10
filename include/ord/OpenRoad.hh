@@ -58,6 +58,8 @@ class dbModule;
 namespace sta {
 class dbSta;
 class dbNetwork;
+class ConcreteNetwork;
+class Instance;
 }  // namespace sta
 
 namespace rsz {
@@ -267,6 +269,24 @@ class OpenRoad
   // DB
   void dumpDb();  /// TODO: hier flag
   void dumpDbModule(odb::dbModule* mod, int hier = 0);
+  // Network
+  void dumpNetwork(sta::ConcreteNetwork* network);
+  void dumpInstFromNetwork(sta::ConcreteNetwork* network,
+                           sta::Instance* inst,
+                           int hierLevel,
+                           std::string& group);
+  void dumpPinOfInstance(sta::ConcreteNetwork* network,
+                         sta::Instance* inst,
+                         int hierLevel,
+                         std::string& group);
+  void dumpNetOfInstance(sta::ConcreteNetwork* network,
+                         sta::Instance* inst,
+                         int hierLevel,
+                         std::string& group);
+  // PDKs
+  void dumpTechLibs();
+  // Region and Group
+  void dumpRegionGroups();
 
  protected:
   ~OpenRoad();
