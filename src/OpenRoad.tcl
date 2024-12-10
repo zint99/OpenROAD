@@ -527,5 +527,10 @@ proc parse_list_args { cmd arg_var list_var lists_args } {
   }
 }
 
+// MY CODE
+proc dump_db { } {
+  ord::dump_db_cmd
+}
+
 # namespace ord
 }

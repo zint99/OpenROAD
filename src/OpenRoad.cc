@@ -705,4 +705,428 @@ bool OpenRoad::getChartsCompileOption()
   return ENABLE_CHARTS;
 }
 
+// FOR DEBUG
+void OpenRoad::dumpDb()
+{
+  /* DB LEVEL*/
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "========================DUMP ODB========================");
+  dbDatabase* odb = getDb();
+  debugPrint(
+      logger_, utl::ODB, "dumpDb", 1, "============ODB Statistic============");
+  debugPrint(
+      logger_, utl::ODB, "dumpDb", 1, "Masters: {}", odb->getNumberOfMasters());
+  /* LIB LEVEL */
+  /// dbLib is cell lef
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "============dbLib============");
+  for (dbLib* lib : odb->getLibs()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "lib: {}, master: {}, lefUnits: {}",
+               lib->getName(),
+               lib->getMasters().size(),
+               lib->getLefUnits());
+  }
+  /* TECH LEVEL */
+  /// dbTech is tech lef
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "============dbTech============");
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "odb can contain multiple techs of each dbBlock");
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "dbTech was recommended to get by dbBlock or dbLib");
+  dbTech* tech = odb->getTech();
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "tech: {}, version: {}, layer: {}, routingLayer: {}, via: {}, "
+             "unitsPerMicron: {}, lefUnits: {}",
+             tech->getName(),
+             tech->getLefVersionStr(),
+             tech->getLayerCount(),
+             tech->getRoutingLayerCount(),
+             tech->getViaCount(),
+             tech->getDbUnitsPerMicron(),
+             tech->getLefUnits());
+  /* TECH -> LAYER */
+  for (auto layer : tech->getLayers()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "layer: {}, area: {}, width: {}, pitch: {}, offset: {}, "
+               "spacing: {}, direction: {}",
+               layer->getName(),
+               layer->getArea(),
+               layer->getWidth(),
+               layer->getPitch(),
+               layer->getOffset(),
+               layer->getSpacing(),
+               layer->getDirection().getString());
+  }
+  /* TECH -> VIA */
+  for (auto via : tech->getVias()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "\nvia: {}, resistance: {}, topLayer: {}, bottomLayer: {}",
+               via->getName(),
+               via->getResistance(),
+               via->getTopLayer()->getName(),
+               via->getBottomLayer()->getName());
+  }
+  /* CHIP LEVEL */
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "============dbChip============");
+  dbChip* chip = odb->getChip();
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "just get dbBlock by dbChip");
+  /* BLOCK LEVEL */
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "============dbBlock============");
+  dbBlock* block = chip->getBlock();
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "dieArea: {}, coreArea: {}, module: {}, modInst: {}, modBTerms: "
+             "{}, modNets: {}, instance: {}, bterms: {}, iterms: {},"
+             " nets: {}, cornerCnt: {}, blockages: {}",
+             block->getDieArea(),
+             block->getCoreArea(),
+             block->getModules().size(),
+             block->getModInsts().size(),
+             block->getModBTerms().size(),
+             block->getModNets().size(),
+             block->getInsts().size(),
+             block->getBTerms().size(),
+             block->getITerms().size(),
+             block->getNets().size(),
+             block->getCornerCount(),
+             block->getBlockages().size());
+
+  /* MODULE LEVEL */
+  dumpDbModule(block->getTopModule());
+
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "========================DUMP ODB========================");
+}
+
+void OpenRoad::dumpDbModule(odb::dbModule* mod, int hier)
+{
+  if (mod == nullptr) {
+    debugPrint(logger_, utl::ORD, "dumpDb", 1, "module is nullptr");
+    return;
+  }
+
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "============dbModule of hier {}============",
+             hier);
+
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "dbModule {}, owner block: {}",
+             mod->getHierarchicalName(),
+             mod->getOwner()->getName());
+
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "============module connections============");
+  // modNet and related terms
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "mod->getModNets()");
+  for (auto modNet : mod->getModNets()) {
+    debugPrint(
+        logger_, utl::ODB, "dumpDb", 1, "dbModNet {}", modNet->getName());
+
+    for (auto modBTerm : modNet->getModBTerms()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpDb",
+                 1,
+                 "\t dbModBTerm {}, dir {}",
+                 modBTerm->getName(),
+                 modBTerm->getIoType().getString());
+    }
+
+    for (auto modITerm : modNet->getModITerms()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpDb",
+                 1,
+                 "\t dbModITerm {}, of dbModInst {}",
+                 modITerm->getName(),
+                 modITerm->getParent()->getHierarchicalName());
+    }
+
+    for (auto bTerm : modNet->getBTerms()) {
+      debugPrint(
+          logger_, utl::ODB, "dumpDb", 1, "\t dbBTerm {}", bTerm->getName());
+    }
+
+    for (auto iTerm : modNet->getITerms()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpDb",
+                 1,
+                 "\t dbITerm {}, dir {}",
+                 iTerm->getName(),
+                 iTerm->getIoType().getString());
+    }
+  }
+
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "mod->getModBTerms()");
+  for (auto modBTerm : mod->getModBTerms()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "dbModBTerm {}, type: {}",
+               modBTerm->getName(),
+               modBTerm->getIoType().getString());
+  }
+
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "module local hierarchy");
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "dbInstCnt in local hier: {}, dbModInstCnt in local hier: {}",
+             mod->getDbInstCount(),
+             mod->getModInstCount());
+
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "mod->getInsts()");
+  for (auto inst : mod->getInsts()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "dbInst in local hier {}",
+               inst->getName());
+  }
+
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "mod->getLeafInsts() from entire hierarchy");
+  for (auto leaf : mod->getLeafInsts()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "leaf: {}, master: {}, area: {}, width: {}, weight: {}, level: "
+               "{}, parent: "
+               "{}, belonged mod: {}, isHierarchical: {}, "
+               "placementStatus: {}",
+               leaf->getName(),
+               leaf->getMaster()->getName(),
+               leaf->getMaster()->getArea(),
+               leaf->getMaster()->getWidth(),
+               leaf->getWeight(),
+               leaf->getLevel(),
+               leaf->getParent() ? leaf->getParent()->getName() : "empty",
+               leaf->getModule()->getHierarchicalName(),
+               leaf->isHierarchical(),
+               leaf->getPlacementStatus().getString());
+
+    // geometry info of dbInst
+    if (leaf->getPlacementStatus().isPlaced()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpDb",
+                 1,
+                 "geometry info of dbInst: (x:{}, y:{})",
+                 leaf->getLocation().getX(),
+                 leaf->getLocation().getY());
+    }
+
+    // mterm
+    for (auto mterm : leaf->getMaster()->getMTerms()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpDb",
+                 1,
+                 "\t dbMTerm {}, dir {}, get (mod)Net from iterm",
+                 mterm->getName(),
+                 mterm->getIoType().getString());
+    }
+
+    // leafInst level
+    for (auto iTerm : leaf->getITerms()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpDb",
+                 1,
+                 "\t dbITerm {}, dir {}, get (mod)Net from iterm",
+                 iTerm->getName(),
+                 iTerm->getIoType().getString());
+      // get (mod)Net from iterm
+      auto modNet = iTerm->getModNet();
+      if (modNet) {
+        debugPrint(logger_,
+                   utl::ODB,
+                   "dumpDb",
+                   1,
+                   "\t\t dbModNet {}",
+                   modNet->getName());
+
+        for (auto modBTerm : modNet->getModBTerms()) {
+          debugPrint(logger_,
+                     utl::ODB,
+                     "dumpDb",
+                     1,
+                     "\t\t\t dbModBTerm {}, dir {}",
+                     modBTerm->getName(),
+                     modBTerm->getIoType().getString());
+        }
+
+        for (auto modITerm : modNet->getModITerms()) {
+          debugPrint(logger_,
+                     utl::ODB,
+                     "dumpDb",
+                     1,
+                     "\t\t\t dbModITerm {}, of dbModInst {}",
+                     modITerm->getName(),
+                     modITerm->getParent()->getHierarchicalName());
+        }
+
+        for (auto bTerm : modNet->getBTerms()) {
+          debugPrint(logger_,
+                     utl::ODB,
+                     "dumpDb",
+                     1,
+                     "\t\t\t dbBTerm {}",
+                     bTerm->getName());
+        }
+
+        for (auto iTerm : modNet->getITerms()) {
+          debugPrint(logger_,
+                     utl::ODB,
+                     "dumpDb",
+                     1,
+                     "\t\t\t dbITerm {}, dir {}",
+                     iTerm->getName(),
+                     iTerm->getIoType().getString());
+        }
+      }
+
+      auto net = iTerm->getNet();
+      if (net) {
+        debugPrint(logger_,
+                   utl::ODB,
+                   "dumpDb",
+                   1,
+                   "\t\t dbNet {}, terms: {}, bterms: {}, iterms: {}, "
+                   "drivingItermID: {}",
+                   net->getName(),
+                   net->getTermCount(),
+                   net->getBTermCount(),
+                   net->getITermCount(),
+                   net->getDrivingITerm());
+        auto firstITerm = net->get1stITerm();
+        auto firstBTerm = net->get1stBTerm();
+
+        if (firstITerm) {
+          debugPrint(logger_,
+                     utl::ODB,
+                     "dumpDb",
+                     1,
+                     "\t\t\t 1stITerm {}, of dbInst {}",
+                     firstITerm->getName(),
+                     firstITerm->getInst()->getName());
+        }
+
+        if (firstBTerm) {
+          debugPrint(logger_,
+                     utl::ODB,
+                     "dumpDb",
+                     1,
+                     "\t\t\t 1stBTerm {}",
+                     firstBTerm->getName());
+
+          // get bpin
+          for (auto bPin : firstBTerm->getBPins()) {
+            debugPrint(logger_,
+                       utl::ODB,
+                       "dumpDb",
+                       1,
+                       "\t\t\t\t bPin getPlacementStatus {}",
+                       bPin->getPlacementStatus().getString());
+          }
+        }
+
+        // dump net related bterms
+        for (odb::dbBTerm* bterm : net->getBTerms()) {
+          debugPrint(logger_,
+                     utl::ODB,
+                     "dumpDb",
+                     1,
+                     "\t\t\t bterm: {}",
+                     bterm->getName());
+          // dump bpin of bterm
+          for (auto bPin : bterm->getBPins()) {
+            debugPrint(logger_,
+                       utl::ODB,
+                       "dumpDb",
+                       1,
+                       "\t\t\t\t bPin getPlacementStatus {}",
+                       bPin->getPlacementStatus().getString());
+          }
+        }
+        // dump net related iterms
+        for (odb::dbITerm* iterm : net->getITerms()) {
+          debugPrint(logger_,
+                     utl::ODB,
+                     "dumpDb",
+                     1,
+                     "\t\t\t iterm {}, of dbInst {}",
+                     iterm->getName(),
+                     iterm->getInst()->getName());
+        }
+      }
+    }
+  }
+
+  debugPrint(logger_, utl::ODB, "dumpDb", 1, "mod->getChildren()");
+  for (auto child : mod->getChildren()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "dbModInst in local hier {}, parent: {}",
+               child->getHierarchicalName(),
+               child->getParent()->getHierarchicalName());
+    // dbModInst level
+    for (auto modITerm : child->getModITerms()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpDb",
+                 1,
+                 "\t dbModITerm {}, of dbModInst {}",
+                 modITerm->getName(),
+                 modITerm->getParent()->getHierarchicalName());
+    }
+    // recursivly dump dbModule
+    dumpDbModule(child->getMaster(), hier + 1);
+  }
+}
 }  // namespace ord

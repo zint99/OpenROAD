@@ -630,4 +630,12 @@ std::string get_docs_path()
 
 }
 
+// MY CODE
+void
+dump_db_cmd()
+{
+  OpenRoad *ord = getOpenRoad();
+  ord->dumpDb();
+}
+
 %} // inline
