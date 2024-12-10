@@ -52,6 +52,7 @@ class dbTech;
 class dbLib;
 class Point;
 class Rect;
+class dbModule;
 }  // namespace odb
 
 namespace sta {
@@ -260,6 +261,11 @@ class OpenRoad
   static bool getGPUCompileOption();
   static bool getPythonCompileOption();
   static bool getGUICompileOption();
+
+  // FOR DEBUG
+  // DB
+  void dumpDb();  /// TODO: hier flag
+  void dumpDbModule(odb::dbModule* mod, int hier = 0);
 
  protected:
   ~OpenRoad();
