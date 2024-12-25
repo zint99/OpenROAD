@@ -260,6 +260,7 @@ void dbSta::makeSdcNetwork()
 
 void dbSta::postReadLef(dbTech* tech, dbLib* library)
 {
+  debugPrint(logger_, utl::ODB, "read_lef", 1, "dbSta::postReadLef");
   if (library) {
     db_network_->readLefAfter(library);
   }
@@ -267,6 +268,7 @@ void dbSta::postReadLef(dbTech* tech, dbLib* library)
 
 void dbSta::postReadDef(dbBlock* block)
 {
+  debugPrint(logger_, utl::ODB, "read_def", 1, "dbSta::postReadDef");
   if (!block->getParent()) {
     db_network_->readDefAfter(block);
     db_cbk_->addOwner(block);
@@ -276,6 +278,8 @@ void dbSta::postReadDef(dbBlock* block)
 
 void dbSta::postReadDb(dbDatabase* db)
 {
+  debugPrint(logger_, utl::ODB, "read_db", 1, "dbSta::postReadDb");
+  debugPrint(logger_, utl::ODB, "link", 1, "dbSta::postReadDb");
   db_network_->readDbAfter(db);
   odb::dbChip* chip = db_->getChip();
   if (chip) {

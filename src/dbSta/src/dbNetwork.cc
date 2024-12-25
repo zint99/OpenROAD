@@ -1861,6 +1861,11 @@ bool dbNetwork::linkNetwork(const char*, bool, Report*)
 
 void dbNetwork::readLefAfter(dbLib* lib)
 {
+  debugPrint(logger_,
+             utl::ODB,
+             "read_lef",
+             1,
+             "read_lef ->  dbNetwork::readLefAfter -> makeLibrary(lib)");
   makeLibrary(lib);
 }
 

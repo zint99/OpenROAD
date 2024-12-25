@@ -548,6 +548,11 @@ void OpenRoad::diffDbs(const char* filename1,
 
 void OpenRoad::readVerilog(const char* filename)
 {
+  debugPrint(logger_,
+             utl::ODB,
+             "verilog",
+             1,
+             "read_verilog: 1.verilog_network_->deleteTopInstance()");
   verilog_network_->deleteTopInstance();
   dbReadVerilog(filename, verilog_network_);
 }
@@ -720,21 +725,47 @@ void OpenRoad::dumpDb()
   dbDatabase* odb = getDb();
   debugPrint(
       logger_, utl::ODB, "dumpDb", 1, "============ODB Statistic============");
-  debugPrint(
-      logger_, utl::ODB, "dumpDb", 1, "Masters: {}", odb->getNumberOfMasters());
+  debugPrint(logger_,
+             utl::ODB,
+             "dumpDb",
+             1,
+             "Id: {}, Type: {}, Chips: {}, Techs: {}, Libs: {}, Masters: {}",
+             odb->getId(),
+             odb->getTypeName(odb->getObjectType()),
+             odb->getChips().size(),
+             odb->getTechs().size(),
+             odb->getLibs().size(),
+             odb->getNumberOfMasters());
+
   /* LIB LEVEL */
   /// dbLib is cell lef
   debugPrint(logger_, utl::ODB, "dumpDb", 1, "============dbLib============");
   for (dbLib* lib : odb->getLibs()) {
-    debugPrint(logger_,
-               utl::ODB,
-               "dumpDb",
-               1,
-               "lib: {}, master: {}, lefUnits: {}",
-               lib->getName(),
-               lib->getMasters().size(),
-               lib->getLefUnits());
+    debugPrint(
+        logger_,
+        utl::ODB,
+        "dumpDb",
+        1,
+        "type: {}, lib: {}, tech: {}, master: {}, sites: {}, lefUnits: {}, "
+        "UnitsPerMicron: {}",
+        lib->getTypeName(lib->getObjectType()),
+        lib->getName(),
+        lib->getTech()->getName(),
+        lib->getMasters().size(),
+        lib->getSites().size(),
+        lib->getLefUnits(),
+        lib->getDbUnitsPerMicron());
+    for (auto site : lib->getSites()) {
+      debugPrint(logger_,
+                 utl::ODB,
+                 "dumpDb",
+                 1,
+                 "type: {}, site: {}",
+                 site->getTypeName(site->getObjectType()),
+                 site->getName());
+    }
   }
+
   /* TECH LEVEL */
   /// dbTech is tech lef
   debugPrint(logger_, utl::ODB, "dumpDb", 1, "============dbTech============");
@@ -753,9 +784,12 @@ void OpenRoad::dumpDb()
              utl::ODB,
              "dumpDb",
              1,
-             "tech: {}, version: {}, layer: {}, routingLayer: {}, via: {}, "
+             "type: {}, tech: {}, id: {}, version: {}, layer: {}, "
+             "routingLayer: {}, via: {}, "
              "unitsPerMicron: {}, lefUnits: {}",
+             tech->getTypeName(tech->getObjectType()),
              tech->getName(),
+             tech->getId(),
              tech->getLefVersionStr(),
              tech->getLayerCount(),
              tech->getRoutingLayerCount(),
@@ -764,31 +798,35 @@ void OpenRoad::dumpDb()
              tech->getLefUnits());
   /* TECH -> LAYER */
   for (auto layer : tech->getLayers()) {
-    debugPrint(logger_,
-               utl::ODB,
-               "dumpDb",
-               1,
-               "layer: {}, area: {}, width: {}, pitch: {}, offset: {}, "
-               "spacing: {}, direction: {}",
-               layer->getName(),
-               layer->getArea(),
-               layer->getWidth(),
-               layer->getPitch(),
-               layer->getOffset(),
-               layer->getSpacing(),
-               layer->getDirection().getString());
+    debugPrint(
+        logger_,
+        utl::ODB,
+        "dumpDb",
+        1,
+        "type: {}, layer: {}, area: {}, width: {}, pitch: {}, offset: {}, "
+        "spacing: {}, direction: {}",
+        layer->getTypeName(layer->getObjectType()),
+        layer->getName(),
+        layer->getArea(),
+        layer->getWidth(),
+        layer->getPitch(),
+        layer->getOffset(),
+        layer->getSpacing(),
+        layer->getDirection().getString());
   }
   /* TECH -> VIA */
   for (auto via : tech->getVias()) {
-    debugPrint(logger_,
-               utl::ODB,
-               "dumpDb",
-               1,
-               "\nvia: {}, resistance: {}, topLayer: {}, bottomLayer: {}",
-               via->getName(),
-               via->getResistance(),
-               via->getTopLayer()->getName(),
-               via->getBottomLayer()->getName());
+    debugPrint(
+        logger_,
+        utl::ODB,
+        "dumpDb",
+        1,
+        "\ntype: {}, via: {}, resistance: {}, topLayer: {}, bottomLayer: {}",
+        via->getTypeName(via->getObjectType()),
+        via->getName(),
+        via->getResistance(),
+        via->getTopLayer()->getName(),
+        via->getBottomLayer()->getName());
   }
   /* CHIP LEVEL */
   debugPrint(logger_, utl::ODB, "dumpDb", 1, "============dbChip============");
@@ -801,9 +839,11 @@ void OpenRoad::dumpDb()
              utl::ODB,
              "dumpDb",
              1,
-             "dieArea: {}, coreArea: {}, module: {}, modInst: {}, modBTerms: "
+             "type: {}, dieArea: {}, coreArea: {}, module: {}, modInst: {}, "
+             "modBTerms: "
              "{}, modNets: {}, instance: {}, bterms: {}, iterms: {},"
              " nets: {}, cornerCnt: {}, blockages: {}",
+             block->getTypeName(block->getObjectType()),
              block->getDieArea(),
              block->getCoreArea(),
              block->getModules().size(),
@@ -816,6 +856,72 @@ void OpenRoad::dumpDb()
              block->getNets().size(),
              block->getCornerCount(),
              block->getBlockages().size());
+
+  // BTerms
+  for (auto bterm : block->getBTerms()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "type: {}, bterm: {}, dir: {}",
+               bterm->getTypeName(bterm->getObjectType()),
+               bterm->getName(),
+               bterm->getIoType().getString());
+  }
+
+  // Modules
+  for (auto mod : block->getModules()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "type: {}, mod: {}, modInst: {}, dbInst: {}",
+               mod->getTypeName(mod->getObjectType()),
+               mod->getHierarchicalName(),
+               mod->getModInstCount(),
+               mod->getDbInstCount());
+  }
+
+  // ModInsts
+  for (auto modInst : block->getModInsts()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "type: {}, modInst: {}, master: {}, parent: {}",
+               modInst->getTypeName(modInst->getObjectType()),
+               modInst->getHierarchicalName(),
+               modInst->getMaster()->getHierarchicalName(),
+               modInst->getParent()->getHierarchicalName());
+  }
+
+  // Insts
+  for (auto inst : block->getInsts()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "type: {}, inst: {}, level: {}, master: {}, parent: {}",
+               inst->getTypeName(inst->getObjectType()),
+               inst->getName(),
+               inst->getLevel(),
+               inst->getMaster()->getName(),
+               inst->getParent() ? inst->getParent()->getName() : "NULL");
+  }
+
+  // ITerms
+  for (auto iterm : block->getITerms()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "type: {}, iterm: {}, dir: {}, sig: {}, of instance: {}",
+               iterm->getTypeName(iterm->getObjectType()),
+               iterm->getName(),
+               iterm->getIoType().getString(),
+               iterm->getSigType().getString(),
+               iterm->getInst()->getName());
+  }
 
   /* MODULE LEVEL */
   dumpDbModule(block->getTopModule());
