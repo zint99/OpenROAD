@@ -1343,15 +1343,18 @@ void OpenRoad::dumpInstFromNetwork(sta::ConcreteNetwork* network,
                utl::ODB,
                group.c_str(),
                1,
-               "{} instance: {}, cell: {}, hierLevel: {}, subInst: {}, pin: "
+               "{} instance: {}, cell: {}, parent: {}, hierLevel: {}, subInst: "
+               "{}, pin: "
                "{}, net: {}",
                baseIndent,
                network->pathName(inst),
                network->cellName(inst),
+               network->pathName(network->parent(inst)),
                hierLevel,
                network->instanceCount(inst),
                network->pinCount(inst),
                network->netCount(inst));
+
     // pin, pinNet, term, termNet
     dumpPinOfInstance(network, inst, hierLevel, group);
     // net

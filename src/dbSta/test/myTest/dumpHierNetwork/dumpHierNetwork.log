@@ -1,0 +1,278 @@
+[INFO ODB-0227] LEF file: ../../liberty1.lef, created 2 layers, 6 library cells
+[DEBUG ODB-dumpVerilogNetwork] ================VerilogNetwork================
+[DEBUG ODB-dumpVerilogNetwork] inst: 9, pin: 28, net: 15, leafInst: 6, leafPin: 18
+[DEBUG ODB-dumpVerilogNetwork] library: verilog
+[DEBUG ODB-dumpVerilogNetwork] ================VerilogNetwork================
+[DEBUG ODB-dumpVerilogNetwork] top instance: , cell: top, hierLevel: 0, subInst: 9, pin: 28, net: 15
+[DEBUG ODB-dumpVerilogNetwork] 	 port: in, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 	 port: clk1, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 	 port: clk2, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 	 port: out, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 	 pin: in, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 		 pin in does not connected to net
+[DEBUG ODB-dumpVerilogNetwork] 		 TermNet: in
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNetPin: b1/in
+[DEBUG ODB-dumpVerilogNetwork] 	 pin: clk1, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 		 pin clk1 does not connected to net
+[DEBUG ODB-dumpVerilogNetwork] 		 TermNet: clk1
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNetPin: b1/clk
+[DEBUG ODB-dumpVerilogNetwork] 	 pin: clk2, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 		 pin clk2 does not connected to net
+[DEBUG ODB-dumpVerilogNetwork] 		 TermNet: clk2
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNetPin: b2/clk
+[DEBUG ODB-dumpVerilogNetwork] 	 pin: out, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 		 pin out does not connected to net
+[DEBUG ODB-dumpVerilogNetwork] 		 TermNet: out
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNetPin: b2/out
+[DEBUG ODB-dumpVerilogNetwork] 	 net: b1out
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b2/in, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b1/out, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 	 net: clk1
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b1/clk, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 		 term: clk1
+[DEBUG ODB-dumpVerilogNetwork] 	 net: clk2
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b2/clk, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 		 term: clk2
+[DEBUG ODB-dumpVerilogNetwork] 	 net: in
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b1/in, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 		 term: in
+[DEBUG ODB-dumpVerilogNetwork] 	 net: out
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b2/out, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 		 term: out
+[DEBUG ODB-dumpVerilogNetwork] 	 instance: b1, cell: block1, hierLevel: 1, subInst: 4, pin: 12, net: 5
+[DEBUG ODB-dumpVerilogNetwork] 		 port: in, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 		 port: clk, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 		 port: out, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b1/in, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 PinNet: in
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNet: b1/in
+[DEBUG ODB-dumpVerilogNetwork] 				 TermNetPin: b1/u1/A
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b1/clk, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 PinNet: clk1
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNet: b1/clk
+[DEBUG ODB-dumpVerilogNetwork] 				 TermNetPin: b1/r1/CP
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b1/out, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 			 PinNet: b1out
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNet: b1/out
+[DEBUG ODB-dumpVerilogNetwork] 				 TermNetPin: b1/u2/Z
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b1/clk
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/CP, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 term: b1/clk
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b1/in
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u1/A, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 term: b1/in
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b1/out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u2/Z, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 			 term: b1/out
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b1/r1q
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u2/A, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/Q, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b1/u1out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/D, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u1/Z, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b1/r1, cell: snl_ffqx1, hierLevel: 2, subInst: 1, pin: 5, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 			 port: IQ, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: IQN, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: Q, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: D, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: CP, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/IQ, dir: internal
+[DEBUG ODB-dumpVerilogNetwork] 				 pin b1/r1/IQ does not connected to net
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/IQN, dir: internal
+[DEBUG ODB-dumpVerilogNetwork] 				 pin b1/r1/IQN does not connected to net
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/Q, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/r1q
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/D, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/u1out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/CP, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/clk
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b1/u1, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 			 port: Z, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: A, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u1/Z, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/u1out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u1/A, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/in
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b1/u2, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 			 port: Z, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: A, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u2/Z, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u2/A, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/r1q
+[DEBUG ODB-dumpVerilogNetwork] 	 instance: b2, cell: block1, hierLevel: 1, subInst: 4, pin: 12, net: 5
+[DEBUG ODB-dumpVerilogNetwork] 		 port: in, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 		 port: clk, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 		 port: out, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b2/in, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 PinNet: b1out
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNet: b2/in
+[DEBUG ODB-dumpVerilogNetwork] 				 TermNetPin: b2/u1/A
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b2/clk, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 PinNet: clk2
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNet: b2/clk
+[DEBUG ODB-dumpVerilogNetwork] 				 TermNetPin: b2/r1/CP
+[DEBUG ODB-dumpVerilogNetwork] 		 pin: b2/out, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 			 PinNet: out
+[DEBUG ODB-dumpVerilogNetwork] 			 TermNet: b2/out
+[DEBUG ODB-dumpVerilogNetwork] 				 TermNetPin: b2/u2/Z
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b2/clk
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/CP, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 term: b2/clk
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b2/in
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u1/A, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 term: b2/in
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b2/out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u2/Z, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 			 term: b2/out
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b2/r1q
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u2/A, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/Q, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 		 net: b2/u1out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/D, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u1/Z, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b2/r1, cell: snl_ffqx1, hierLevel: 2, subInst: 1, pin: 5, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 			 port: IQ, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: IQN, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: Q, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: D, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: CP, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/IQ, dir: internal
+[DEBUG ODB-dumpVerilogNetwork] 				 pin b2/r1/IQ does not connected to net
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/IQN, dir: internal
+[DEBUG ODB-dumpVerilogNetwork] 				 pin b2/r1/IQN does not connected to net
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/Q, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/r1q
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/D, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/u1out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/CP, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/clk
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b2/u1, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 			 port: Z, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: A, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u1/Z, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/u1out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u1/A, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/in
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b2/u2, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 			 port: Z, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 port: A, isBus: false
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u2/Z, dir: output
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/out
+[DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u2/A, dir: input
+[DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/r1q
+[DEBUG ODB-dumpDbNetwork] ================dbNetwork================
+[DEBUG ODB-dumpDbNetwork] inst: 9, pin: 18, net: 6, leafInst: 6, leafPin: 14
+[DEBUG ODB-dumpDbNetwork] library: liberty1
+[DEBUG ODB-dumpDbNetwork] library: liberty1
+[DEBUG ODB-dumpDbNetwork] library: liberty1
+[DEBUG ODB-dumpDbNetwork] library: top
+[DEBUG ODB-dumpDbNetwork] libertyLibrary: ../../liberty1.lib
+[DEBUG ODB-dumpDbNetwork] ================dbNetwork================
+[DEBUG ODB-dumpDbNetwork] top instance: , cell: top, hierLevel: 0, subInst: 9, pin: 18, net: 6
+[DEBUG ODB-dumpDbNetwork] 	 port: clk1, isBus: false
+[DEBUG ODB-dumpDbNetwork] 	 port: clk2, isBus: false
+[DEBUG ODB-dumpDbNetwork] 	 port: in, isBus: false
+[DEBUG ODB-dumpDbNetwork] 	 port: out, isBus: false
+[DEBUG ODB-dumpDbNetwork] 	 pin: clk1, dir: input
+[DEBUG ODB-dumpDbNetwork] 		 pin clk1 does not connected to net
+[DEBUG ODB-dumpDbNetwork] 		 TermNet: clk1
+[DEBUG ODB-dumpDbNetwork] 			 TermNetPin: b1/clk
+[DEBUG ODB-dumpDbNetwork] 	 pin: clk2, dir: input
+[DEBUG ODB-dumpDbNetwork] 		 pin clk2 does not connected to net
+[DEBUG ODB-dumpDbNetwork] 		 TermNet: clk2
+[DEBUG ODB-dumpDbNetwork] 			 TermNetPin: b2/clk
+[DEBUG ODB-dumpDbNetwork] 	 pin: in, dir: input
+[DEBUG ODB-dumpDbNetwork] 		 pin in does not connected to net
+[DEBUG ODB-dumpDbNetwork] 		 TermNet: in
+[DEBUG ODB-dumpDbNetwork] 			 TermNetPin: b1/in
+[DEBUG ODB-dumpDbNetwork] 	 pin: out, dir: output
+[DEBUG ODB-dumpDbNetwork] 		 pin out does not connected to net
+[DEBUG ODB-dumpDbNetwork] 		 TermNet: out
+[DEBUG ODB-dumpDbNetwork] 			 TermNetPin: b2/out
+[DEBUG ODB-dumpDbNetwork] 	 instance: b1, cell: block1, hierLevel: 1, subInst: 4, pin: 7, net: 3
+[DEBUG ODB-dumpDbNetwork] 		 port: in, isBus: false
+[DEBUG ODB-dumpDbNetwork] 		 port: clk, isBus: false
+[DEBUG ODB-dumpDbNetwork] 		 port: out, isBus: false
+[DEBUG ODB-dumpDbNetwork] 		 net: out
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/u2/Z, dir: output
+[DEBUG ODB-dumpDbNetwork] 			 term: b1/out
+[DEBUG ODB-dumpDbNetwork] 		 net: clk
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/r1/CP, dir: input
+[DEBUG ODB-dumpDbNetwork] 			 term: b1/clk
+[DEBUG ODB-dumpDbNetwork] 		 net: in
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/u1/A, dir: input
+[DEBUG ODB-dumpDbNetwork] 			 term: b1/in
+[DEBUG ODB-dumpDbNetwork] 		 instance: b1/r1, cell: snl_ffqx1, hierLevel: 2, subInst: 1, pin: 3, net: 0
+[DEBUG ODB-dumpDbNetwork] 			 port: Q, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: D, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: CP, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VDD, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VSS, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/r1/Q, dir: output
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: b1/r1q
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/r1/D, dir: input
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: b1/u1out
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/r1/CP, dir: input
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: clk
+[DEBUG ODB-dumpDbNetwork] 		 instance: b1/u1, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpDbNetwork] 			 port: Z, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: A, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VDD, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VSS, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/u1/Z, dir: output
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: b1/u1out
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/u1/A, dir: input
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: in
+[DEBUG ODB-dumpDbNetwork] 		 instance: b1/u2, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpDbNetwork] 			 port: Z, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: A, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VDD, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VSS, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/u2/Z, dir: output
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: out
+[DEBUG ODB-dumpDbNetwork] 			 pin: b1/u2/A, dir: input
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: b1/r1q
+[DEBUG ODB-dumpDbNetwork] 	 instance: b2, cell: block1_b2, hierLevel: 1, subInst: 4, pin: 7, net: 3
+[DEBUG ODB-dumpDbNetwork] 		 port: in, isBus: false
+[DEBUG ODB-dumpDbNetwork] 		 port: clk, isBus: false
+[DEBUG ODB-dumpDbNetwork] 		 port: out, isBus: false
+[DEBUG ODB-dumpDbNetwork] 		 net: out
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/u2/Z, dir: output
+[DEBUG ODB-dumpDbNetwork] 			 term: b2/out
+[DEBUG ODB-dumpDbNetwork] 		 net: clk
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/r1/CP, dir: input
+[DEBUG ODB-dumpDbNetwork] 			 term: b2/clk
+[DEBUG ODB-dumpDbNetwork] 		 net: in
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/u1/A, dir: input
+[DEBUG ODB-dumpDbNetwork] 			 term: b2/in
+[DEBUG ODB-dumpDbNetwork] 		 instance: b2/r1, cell: snl_ffqx1, hierLevel: 2, subInst: 1, pin: 3, net: 0
+[DEBUG ODB-dumpDbNetwork] 			 port: Q, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: D, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: CP, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VDD, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VSS, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/r1/Q, dir: output
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: b2/r1q
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/r1/D, dir: input
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: b2/u1out
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/r1/CP, dir: input
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: clk
+[DEBUG ODB-dumpDbNetwork] 		 instance: b2/u1, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpDbNetwork] 			 port: Z, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: A, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VDD, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VSS, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/u1/Z, dir: output
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: b2/u1out
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/u1/A, dir: input
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: in
+[DEBUG ODB-dumpDbNetwork] 		 instance: b2/u2, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpDbNetwork] 			 port: Z, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: A, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VDD, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 port: VSS, isBus: false
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/u2/Z, dir: output
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: out
+[DEBUG ODB-dumpDbNetwork] 			 pin: b2/u2/A, dir: input
+[DEBUG ODB-dumpDbNetwork] 				 PinNet: b2/r1q

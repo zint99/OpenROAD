@@ -1,9 +1,9 @@
 # dump all about data model
-source "../helpers.tcl"
+source "../../helpers.tcl"
 # SET UP
-set LEF_FILE "../liberty1.lef"
-set LIB_FILE "../liberty1.lib"
-set VERILOG "../hier1.v"
+set LEF_FILE "../../liberty1.lef"
+set LIB_FILE "../../liberty1.lib"
+set VERILOG "../../hier1.v"
 set DESIGN "top"
 
 set_debug_level ODB dumpPDK 1

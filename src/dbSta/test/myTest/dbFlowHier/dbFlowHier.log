@@ -1,0 +1,9 @@
+@@read_db
+[DEBUG ODB-dumpVerilogNetwork] ================VerilogNetwork================
+[WARNING ODB-8000] empty dbVerilogNetwork
+[DEBUG ODB-dumpVerilogNetwork] ================VerilogNetwork================
+[WARNING ODB-8001] no instance in network
+[DEBUG ODB-dumpDbNetwork] ================dbNetwork================
+[WARNING ODB-8000] empty dbVerilogNetwork
+[DEBUG ODB-dumpDbNetwork] ================dbNetwork================
+[WARNING ODB-8001] no instance in network
