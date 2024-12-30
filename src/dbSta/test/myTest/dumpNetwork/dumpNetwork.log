@@ -4,6 +4,7 @@
 [DEBUG ODB-dumpVerilogNetwork] library: verilog
 [DEBUG ODB-dumpVerilogNetwork] ================VerilogNetwork================
 [DEBUG ODB-dumpVerilogNetwork] top instance: , cell: top, hierLevel: 0, subInst: 9, pin: 28, net: 15
+[DEBUG ODB-dumpVerilogNetwork] cell: top
 [DEBUG ODB-dumpVerilogNetwork] 	 port: in, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 	 port: clk1, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 	 port: clk2, isBus: false
@@ -39,7 +40,7 @@
 [DEBUG ODB-dumpVerilogNetwork] 	 net: out
 [DEBUG ODB-dumpVerilogNetwork] 		 pin: b2/out, dir: output
 [DEBUG ODB-dumpVerilogNetwork] 		 term: out
-[DEBUG ODB-dumpVerilogNetwork] 	 instance: b1, cell: block1, hierLevel: 1, subInst: 4, pin: 12, net: 5
+[DEBUG ODB-dumpVerilogNetwork] 	 instance: b1, cell: block1, parent: , hierLevel: 1, subInst: 4, pin: 12, net: 5
 [DEBUG ODB-dumpVerilogNetwork] 		 port: in, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 		 port: clk, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 		 port: out, isBus: false
@@ -70,7 +71,7 @@
 [DEBUG ODB-dumpVerilogNetwork] 		 net: b1/u1out
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/D, dir: input
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u1/Z, dir: output
-[DEBUG ODB-dumpVerilogNetwork] 		 instance: b1/r1, cell: snl_ffqx1, hierLevel: 2, subInst: 1, pin: 5, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b1/r1, cell: snl_ffqx1, parent: b1, hierLevel: 2, subInst: 1, pin: 5, net: 0
 [DEBUG ODB-dumpVerilogNetwork] 			 port: IQ, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 port: IQN, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 port: Q, isBus: false
@@ -86,21 +87,21 @@
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/u1out
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/r1/CP, dir: input
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/clk
-[DEBUG ODB-dumpVerilogNetwork] 		 instance: b1/u1, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b1/u1, cell: snl_bufx1, parent: b1, hierLevel: 2, subInst: 1, pin: 2, net: 0
 [DEBUG ODB-dumpVerilogNetwork] 			 port: Z, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 port: A, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u1/Z, dir: output
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/u1out
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u1/A, dir: input
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/in
-[DEBUG ODB-dumpVerilogNetwork] 		 instance: b1/u2, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b1/u2, cell: snl_bufx1, parent: b1, hierLevel: 2, subInst: 1, pin: 2, net: 0
 [DEBUG ODB-dumpVerilogNetwork] 			 port: Z, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 port: A, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u2/Z, dir: output
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/out
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b1/u2/A, dir: input
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b1/r1q
-[DEBUG ODB-dumpVerilogNetwork] 	 instance: b2, cell: block1, hierLevel: 1, subInst: 4, pin: 12, net: 5
+[DEBUG ODB-dumpVerilogNetwork] 	 instance: b2, cell: block1, parent: , hierLevel: 1, subInst: 4, pin: 12, net: 5
 [DEBUG ODB-dumpVerilogNetwork] 		 port: in, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 		 port: clk, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 		 port: out, isBus: false
@@ -131,7 +132,7 @@
 [DEBUG ODB-dumpVerilogNetwork] 		 net: b2/u1out
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/D, dir: input
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u1/Z, dir: output
-[DEBUG ODB-dumpVerilogNetwork] 		 instance: b2/r1, cell: snl_ffqx1, hierLevel: 2, subInst: 1, pin: 5, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b2/r1, cell: snl_ffqx1, parent: b2, hierLevel: 2, subInst: 1, pin: 5, net: 0
 [DEBUG ODB-dumpVerilogNetwork] 			 port: IQ, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 port: IQN, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 port: Q, isBus: false
@@ -147,14 +148,14 @@
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/u1out
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/r1/CP, dir: input
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/clk
-[DEBUG ODB-dumpVerilogNetwork] 		 instance: b2/u1, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b2/u1, cell: snl_bufx1, parent: b2, hierLevel: 2, subInst: 1, pin: 2, net: 0
 [DEBUG ODB-dumpVerilogNetwork] 			 port: Z, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 port: A, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u1/Z, dir: output
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/u1out
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u1/A, dir: input
 [DEBUG ODB-dumpVerilogNetwork] 				 PinNet: b2/in
-[DEBUG ODB-dumpVerilogNetwork] 		 instance: b2/u2, cell: snl_bufx1, hierLevel: 2, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpVerilogNetwork] 		 instance: b2/u2, cell: snl_bufx1, parent: b2, hierLevel: 2, subInst: 1, pin: 2, net: 0
 [DEBUG ODB-dumpVerilogNetwork] 			 port: Z, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 port: A, isBus: false
 [DEBUG ODB-dumpVerilogNetwork] 			 pin: b2/u2/Z, dir: output
@@ -170,6 +171,7 @@
 [DEBUG ODB-dumpDbNetwork] libertyLibrary: ../../liberty1.lib
 [DEBUG ODB-dumpDbNetwork] ================dbNetwork================
 [DEBUG ODB-dumpDbNetwork] top instance: , cell: top, hierLevel: 0, subInst: 7, pin: 18, net: 9
+[DEBUG ODB-dumpDbNetwork] cell: top
 [DEBUG ODB-dumpDbNetwork] 	 port: clk1, isBus: false
 [DEBUG ODB-dumpDbNetwork] 	 port: clk2, isBus: false
 [DEBUG ODB-dumpDbNetwork] 	 port: in, isBus: false
@@ -217,7 +219,7 @@
 [DEBUG ODB-dumpDbNetwork] 	 net: b2/u1out
 [DEBUG ODB-dumpDbNetwork] 		 pin: b2/u1/Z, dir: output
 [DEBUG ODB-dumpDbNetwork] 		 pin: b2/r1/D, dir: input
-[DEBUG ODB-dumpDbNetwork] 	 instance: b1/r1, cell: snl_ffqx1, hierLevel: 1, subInst: 1, pin: 3, net: 0
+[DEBUG ODB-dumpDbNetwork] 	 instance: b1/r1, cell: snl_ffqx1, parent: , hierLevel: 1, subInst: 1, pin: 3, net: 0
 [DEBUG ODB-dumpDbNetwork] 		 port: Q, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: D, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: CP, isBus: false
@@ -229,7 +231,7 @@
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: b1/u1out
 [DEBUG ODB-dumpDbNetwork] 		 pin: b1/r1/CP, dir: input
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: clk1
-[DEBUG ODB-dumpDbNetwork] 	 instance: b1/u1, cell: snl_bufx1, hierLevel: 1, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpDbNetwork] 	 instance: b1/u1, cell: snl_bufx1, parent: , hierLevel: 1, subInst: 1, pin: 2, net: 0
 [DEBUG ODB-dumpDbNetwork] 		 port: Z, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: A, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: VDD, isBus: false
@@ -238,7 +240,7 @@
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: b1/u1out
 [DEBUG ODB-dumpDbNetwork] 		 pin: b1/u1/A, dir: input
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: in
-[DEBUG ODB-dumpDbNetwork] 	 instance: b1/u2, cell: snl_bufx1, hierLevel: 1, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpDbNetwork] 	 instance: b1/u2, cell: snl_bufx1, parent: , hierLevel: 1, subInst: 1, pin: 2, net: 0
 [DEBUG ODB-dumpDbNetwork] 		 port: Z, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: A, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: VDD, isBus: false
@@ -247,7 +249,7 @@
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: b1out
 [DEBUG ODB-dumpDbNetwork] 		 pin: b1/u2/A, dir: input
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: b1/r1q
-[DEBUG ODB-dumpDbNetwork] 	 instance: b2/r1, cell: snl_ffqx1, hierLevel: 1, subInst: 1, pin: 3, net: 0
+[DEBUG ODB-dumpDbNetwork] 	 instance: b2/r1, cell: snl_ffqx1, parent: , hierLevel: 1, subInst: 1, pin: 3, net: 0
 [DEBUG ODB-dumpDbNetwork] 		 port: Q, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: D, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: CP, isBus: false
@@ -259,7 +261,7 @@
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: b2/u1out
 [DEBUG ODB-dumpDbNetwork] 		 pin: b2/r1/CP, dir: input
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: clk2
-[DEBUG ODB-dumpDbNetwork] 	 instance: b2/u1, cell: snl_bufx1, hierLevel: 1, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpDbNetwork] 	 instance: b2/u1, cell: snl_bufx1, parent: , hierLevel: 1, subInst: 1, pin: 2, net: 0
 [DEBUG ODB-dumpDbNetwork] 		 port: Z, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: A, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: VDD, isBus: false
@@ -268,7 +270,7 @@
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: b2/u1out
 [DEBUG ODB-dumpDbNetwork] 		 pin: b2/u1/A, dir: input
 [DEBUG ODB-dumpDbNetwork] 			 PinNet: b1out
-[DEBUG ODB-dumpDbNetwork] 	 instance: b2/u2, cell: snl_bufx1, hierLevel: 1, subInst: 1, pin: 2, net: 0
+[DEBUG ODB-dumpDbNetwork] 	 instance: b2/u2, cell: snl_bufx1, parent: , hierLevel: 1, subInst: 1, pin: 2, net: 0
 [DEBUG ODB-dumpDbNetwork] 		 port: Z, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: A, isBus: false
 [DEBUG ODB-dumpDbNetwork] 		 port: VDD, isBus: false

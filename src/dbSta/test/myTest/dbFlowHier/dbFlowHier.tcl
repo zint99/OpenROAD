@@ -12,8 +12,7 @@ set_debug_level ODB dumpDbNetwork 1
 set_debug_level ODB dumpVerilogNetwork 1 
 
 puts "@@read_db"
-set new_db [odb::dbDatabase_create]
-odb::read_db $new_db $db_file
+read_db $db_file -hier
 
 # ord::dump_db
 ord::dump_db_verilog_network

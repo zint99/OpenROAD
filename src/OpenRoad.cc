@@ -1329,6 +1329,16 @@ void OpenRoad::dumpInstFromNetwork(sta::ConcreteNetwork* network,
                network->instanceCount(inst),
                network->pinCount(inst),
                network->netCount(inst));
+    // cell
+    auto cell = network->cell(inst);
+    debugPrint(logger_,
+               utl::ODB,
+               group.c_str(),
+               1,
+               "{}cell: {}",
+               baseIndent,
+               network->name(cell));
+
     // pin
     dumpPinOfInstance(network, inst, hierLevel, group);
     // net
