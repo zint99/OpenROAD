@@ -215,6 +215,14 @@ void definNet::connection(const char* iname, const char* tname)
   }
 
   dbMaster* master = inst->getMaster();
+  debugPrint(_logger,
+             utl::ODB,
+             "read_def",
+             1,
+             "definNet::connection: inst {}, master {}, mterm {}",
+             iname,
+             master->getName(),
+             tname);
   dbMTerm* mterm = master->findMTerm(_block, tname);
 
   if (mterm == nullptr) {
