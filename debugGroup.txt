@@ -1,0 +1,6 @@
+set_debug_level ODB dumpPDK 1
+set_debug_level ODB dumpDb 1
+set_debug_level ODB dumpDbNetwork 1
+set_debug_level ODB dumpVerilogNetwork 1 
+set_debug_level ODB dumpRegion 1 
+set_debug_level ODB gpdk 1 

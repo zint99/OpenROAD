@@ -283,9 +283,12 @@ class OpenRoad
                          int hierLevel,
                          std::string& group);
   // PDKs
-  void dumpTechLibs();
+  void dumpPdks();
   // Region and Group
   void dumpRegionGroups();
+
+  // for GPDK
+  void mapToSpecificPdk();
 
  protected:
   ~OpenRoad();

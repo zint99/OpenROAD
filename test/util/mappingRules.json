@@ -1,0 +1,317 @@
+[
+    {
+        "N45": "AND2_X1",
+        "SKY130": "sky130_fd_sc_hd__and2_1",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "AND2_X2",
+        "SKY130": "sky130_fd_sc_hd__and2_2",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "AND3_X1",
+        "SKY130": "sky130_fd_sc_hd__and3_1",
+        "Port": "A1->A, A2->B, A3->C, ZN->X"
+    },
+    {
+        "N45": "AND4_X1",
+        "SKY130": "sky130_fd_sc_hd__and4_1",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "AND4_X2",
+        "SKY130": "sky130_fd_sc_hd__and4_2",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "AOI21_X1",
+        "SKY130": "sky130_fd_sc_hd__a21oi_1",
+        "Port": "A->B1, B1->A1, B2->A2, ZN->Y"
+    },
+    {
+        "N45": "AOI21_X2",
+        "SKY130": "sky130_fd_sc_hd__a21oi_2",
+        "Port": "A->B1, B1->A1, B2->A2, ZN->Y"
+    },
+    {
+        "N45": "AOI211_X2",
+        "SKY130": "sky130_fd_sc_hd__a211oi_2",
+        "Port": "C1->A1, C2->A2, A->B1, B->C1, ZN->Y"
+    },
+    {
+        "N45": "AOI211_X4",
+        "SKY130": "sky130_fd_sc_hd__a211oi_4",
+        "Port": "C1->A1, C2->A2, A->B1, B->C1, ZN->Y"
+    },
+    {
+        "N45": "AOI22_X1",
+        "SKY130": "sky130_fd_sc_hd__a22oi_1",
+        "Port": "A1->B1, A2->B2, B1->A1, B2->A2, ZN->Y"
+    },
+    {
+        "N45": "AOI221_X1",
+        "SKY130": "sky130_fd_sc_hd__a221oi_1",
+        "Port": "A->C1, B1->A1, B2->A2, C1->B1, C2->B2, ZN->Y"
+    },
+    {
+        "N45": "AOI221_X2",
+        "SKY130": "sky130_fd_sc_hd__a221oi_2",
+        "Port": "A->C1, B1->A1, B2->A2, C1->B1, C2->B2, ZN->Y"
+    },
+    {
+        "N45": "AOI222_X1",
+        "SKY130": "sky130_fd_sc_hd__a222oi_1",
+        "Port": "ZN->Y"
+    },
+    {
+        "N45": "AOI222_X2",
+        "SKY130": "sky130_fd_sc_hd__a222oi_2",
+        "Port": "ZN->Y"
+    },
+    {
+        "N45": "BUF_X1",
+        "SKY130": "sky130_fd_sc_hd__buf_1",
+        "Port": "Z->X"
+    },
+    {
+        "N45": "BUF_X16",
+        "SKY130": "sky130_fd_sc_hd__buf_16",
+        "Port": "Z->X"
+    },
+    {
+        "N45": "BUF_X2",
+        "SKY130": "sky130_fd_sc_hd__buf_2",
+        "Port": "Z->X"
+    },
+    {
+        "N45": "BUF_X4",
+        "SKY130": "sky130_fd_sc_hd__buf_4",
+        "Port": "Z->X"
+    },
+    {
+        "N45": "BUF_X8",
+        "SKY130": "sky130_fd_sc_hd__buf_8",
+        "Port": "Z->X"
+    },
+    {
+        "N45": "CLKBUF_X1",
+        "SKY130": "sky130_fd_sc_hd__clkbuf_1",
+        "Port": "Z->X"
+    },
+    {
+        "N45": "CLKBUF_X2",
+        "SKY130": "sky130_fd_sc_hd__clkbuf_2",
+        "Port": "Z->X"
+    },
+    {
+        "N45": "DFF_X1",
+        "SKY130": "sky130_fd_sc_hd__dfxbp_1",
+        "Port": "IQN->IQ_N, CK->CLK, QN->Q_N"
+    },
+    {
+        "N45": "HA_X1",
+        "SKY130": "sky130_fd_sc_hd__ha_1",
+        "Port": "CO->COUNT, S->SUM"
+    },
+    {
+        "N45": "INV_X1",
+        "SKY130": "sky130_fd_sc_hd__inv_1",
+        "Port": "ZN->Y"
+    },
+    {
+        "N45": "INV_X2",
+        "SKY130": "sky130_fd_sc_hd__inv_2",
+        "Port": "ZN->Y"
+    },
+    {
+        "N45": "INV_X4",
+        "SKY130": "sky130_fd_sc_hd__inv_4",
+        "Port": "ZN->Y"
+    },
+    {
+        "N45": "INV_X8",
+        "SKY130": "sky130_fd_sc_hd__inv_8",
+        "Port": "ZN->Y"
+    },
+    {
+        "N45": "MUX2_X1",
+        "SKY130": "sky130_fd_sc_hd__mux2_1",
+        "Port": "A->A0, B->A1,  Z->X"
+    },
+    {
+        "N45": "MUX2_X2",
+        "SKY130": "sky130_fd_sc_hd__mux2_2",
+        "Port": "A->A0, B->A1,  Z->X"
+    },
+    {
+        "N45": "NAND2_X1",
+        "SKY130": "sky130_fd_sc_hd__nand2_1",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "NAND2_X2",
+        "SKY130": "sky130_fd_sc_hd__nand2_2",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "NAND2_X4",
+        "SKY130": "sky130_fd_sc_hd__nand2_4",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "NAND3_X1",
+        "SKY130": "sky130_fd_sc_hd__nand3_1",
+        "Port": "A1->A, A2->B, A3->C, ZN->X"
+    },
+    {
+        "N45": "NAND3_X2",
+        "SKY130": "sky130_fd_sc_hd__nand3_2",
+        "Port": "A1->A, A2->B, A3->C, ZN->X"
+    },
+    {
+        "N45": "NAND3_X4",
+        "SKY130": "sky130_fd_sc_hd__nand3_4",
+        "Port": "A1->A, A2->B, A3->C, ZN->X"
+    },
+    {
+        "N45": "NAND4_X1",
+        "SKY130": "sky130_fd_sc_hd__nand4_1",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "NAND4_X2",
+        "SKY130": "sky130_fd_sc_hd__nand4_2",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "NAND4_X4",
+        "SKY130": "sky130_fd_sc_hd__nand4_4",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "NOR2_X1",
+        "SKY130": "sky130_fd_sc_hd__nor2_1",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "NOR2_X2",
+        "SKY130": "sky130_fd_sc_hd__nor2_2",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "NOR3_X1",
+        "SKY130": "sky130_fd_sc_hd__nor3_1",
+        "Port": "A1->A, A2->B, A3->C, ZN->X"
+    },
+    {
+        "N45": "NOR3_X2",
+        "SKY130": "sky130_fd_sc_hd__nor3_2",
+        "Port": "A1->A, A2->B, A3->C, ZN->X"
+    },
+    {
+        "N45": "NOR3_X4",
+        "SKY130": "sky130_fd_sc_hd__nor3_4",
+        "Port": "A1->A, A2->B, A3->C, ZN->X"
+    },
+    {
+        "N45": "NOR4_X2",
+        "SKY130": "sky130_fd_sc_hd__nor4_2",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "NOR4_X4",
+        "SKY130": "sky130_fd_sc_hd__nor4_4",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "OAI21_X1",
+        "SKY130": "sky130_fd_sc_hd__o21ai_1",
+        "Port": "A->B1, B1->A1, B2->A2, ZN->Y"
+    },
+    {
+        "N45": "OAI21_X2",
+        "SKY130": "sky130_fd_sc_hd__o21ai_2",
+        "Port": "A->B1, B1->A1, B2->A2, ZN->Y"
+    },
+    {
+        "N45": "OAI211_X2",
+        "SKY130": "sky130_fd_sc_hd__o21ai_2",
+        "Port": "C1->A1, C2->A2, A->B1, B->C1, ZN->Y"
+    },
+    {
+        "N45": "OAI22_X1",
+        "SKY130": "sky130_fd_sc_hd__o22ai_1",
+        "Port": "A1->B1, A2->B2, B1->A1, B2->A2, ZN->Y"
+    },
+    {
+        "N45": "OAI221_X1",
+        "SKY130": "sky130_fd_sc_hd__o221ai_1",
+        "Port": "A->C1, B1->A1, B2->A2, C1->B1, C2->B2, ZN->Y"
+    },
+    {
+        "N45": "OAI222_X1",
+        "SKY130": "sky130_fd_sc_hd__o222ai_1",
+        "Port": "ZN->Y"
+    },
+    {
+        "N45": "OAI33_X1",
+        "SKY130": "sky130_fd_sc_hd__o33ai_1",
+        "Port": ""
+    },
+    {
+        "N45": "OR2_X1",
+        "SKY130": "sky130_fd_sc_hd__or2_1",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "OR2_X2",
+        "SKY130": "sky130_fd_sc_hd__or2_2",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "OR2_X4",
+        "SKY130": "sky130_fd_sc_hd__or2_4",
+        "Port": "A1->A, A2->B, ZN->X"
+    },
+    {
+        "N45": "OR3_X1",
+        "SKY130": "sky130_fd_sc_hd__or3_1",
+        "Port": "A1->A, A2->B, A3->C, ZN->X"
+    },
+    {
+        "N45": "OR4_X1",
+        "SKY130": "sky130_fd_sc_hd__or4_1",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "OR4_X2",
+        "SKY130": "sky130_fd_sc_hd__or4_2",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "OR4_X4",
+        "SKY130": "sky130_fd_sc_hd__or4_4",
+        "Port": "A1->A, A2->B, A3->C, A4->D, ZN->X"
+    },
+    {
+        "N45": "XNOR2_X1",
+        "SKY130": "sky130_fd_sc_hd__xnor2_1",
+        "Port": "ZN->Y"
+    },
+    {
+        "N45": "XNOR2_X2",
+        "SKY130": "sky130_fd_sc_hd__xnor2_2",
+        "Port": "ZN->Y"
+    },
+    {
+        "N45": "XOR2_X1",
+        "SKY130": "sky130_fd_sc_hd__xor2_1",
+        "Port": "Z->X"
+    },
+    {
+        "N45": "XOR2_X2",
+        "SKY130": "sky130_fd_sc_hd__xor2_2",
+        "Port": "Z->X"
+    }
+]

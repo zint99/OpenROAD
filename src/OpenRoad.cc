@@ -35,13 +35,16 @@
 
 #include "ord/OpenRoad.hh"
 
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <thread>
 #include <vector>
 
 #include "ord/Version.hh"
+#include "sta/PatternMatch.hh"
 #ifdef ENABLE_PYTHON3
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
@@ -89,6 +92,8 @@
 #include "utl/ScopedTemporaryFile.h"
 // MY CODE
 #include "sta/ConcreteLibrary.hh"
+#include "sta/FuncExpr.hh"
+#include "sta/Liberty.hh"
 #include "sta/PortDirection.hh"
 
 namespace sta {
@@ -342,6 +347,35 @@ void OpenRoad::readDef(const char* filename,
     for (OpenRoadObserver* observer : observers_) {
       observer->postReadDef(block);
     }
+  }
+  debugPrint(logger_, utl::ODB, "read_def", 1, "dump after read_def");
+  odb::dbDatabase* db = getDb();
+  if (tech) {
+    debugPrint(
+        logger_, utl::ODB, "read_def", 1, "the tech is {}", tech->getName());
+  }
+
+  // dump pdk
+  dumpPdks();
+
+  // dump masters in  block
+  debugPrint(logger_,
+             utl::ODB,
+             "read_def",
+             1,
+             "total {} master in db",
+             db->getNumberOfMasters());
+
+  std::vector<odb::dbMaster*> masters;
+  block->getMasters(masters);
+  for (auto m : masters) {
+    debugPrint(logger_,
+               utl::ODB,
+               "read_def",
+               1,
+               "master {} of Lib {}",
+               m->getName(),
+               m->getLib()->getName());
   }
 }
 
@@ -768,66 +802,69 @@ void OpenRoad::dumpDb()
 
   /* TECH LEVEL */
   /// dbTech is tech lef
-  debugPrint(logger_, utl::ODB, "dumpDb", 1, "============dbTech============");
-  debugPrint(logger_,
-             utl::ODB,
-             "dumpDb",
-             1,
-             "odb can contain multiple techs of each dbBlock");
-  debugPrint(logger_,
-             utl::ODB,
-             "dumpDb",
-             1,
-             "dbTech was recommended to get by dbBlock or dbLib");
-  dbTech* tech = odb->getTech();
-  debugPrint(logger_,
-             utl::ODB,
-             "dumpDb",
-             1,
-             "type: {}, tech: {}, id: {}, version: {}, layer: {}, "
-             "routingLayer: {}, via: {}, "
-             "unitsPerMicron: {}, lefUnits: {}",
-             tech->getTypeName(tech->getObjectType()),
-             tech->getName(),
-             tech->getId(),
-             tech->getLefVersionStr(),
-             tech->getLayerCount(),
-             tech->getRoutingLayerCount(),
-             tech->getViaCount(),
-             tech->getDbUnitsPerMicron(),
-             tech->getLefUnits());
-  /* TECH -> LAYER */
-  for (auto layer : tech->getLayers()) {
+  for (auto tech : odb->getTechs()) {
     debugPrint(
-        logger_,
-        utl::ODB,
-        "dumpDb",
-        1,
-        "type: {}, layer: {}, area: {}, width: {}, pitch: {}, offset: {}, "
-        "spacing: {}, direction: {}",
-        layer->getTypeName(layer->getObjectType()),
-        layer->getName(),
-        layer->getArea(),
-        layer->getWidth(),
-        layer->getPitch(),
-        layer->getOffset(),
-        layer->getSpacing(),
-        layer->getDirection().getString());
+        logger_, utl::ODB, "dumpDb", 1, "============dbTech============");
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "odb can contain multiple techs of each dbBlock");
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "dbTech was recommended to get by dbBlock or dbLib");
+    debugPrint(logger_,
+               utl::ODB,
+               "dumpDb",
+               1,
+               "type: {}, tech: {}, id: {}, version: {}, layer: {}, "
+               "routingLayer: {}, via: {}, "
+               "unitsPerMicron: {}, lefUnits: {}",
+               tech->getTypeName(tech->getObjectType()),
+               tech->getName(),
+               tech->getId(),
+               tech->getLefVersionStr(),
+               tech->getLayerCount(),
+               tech->getRoutingLayerCount(),
+               tech->getViaCount(),
+               tech->getDbUnitsPerMicron(),
+               tech->getLefUnits());
+    /* TECH -> LAYER */
+    for (auto layer : tech->getLayers()) {
+      debugPrint(
+          logger_,
+          utl::ODB,
+          "dumpDb",
+          1,
+          "type: {}, layer: {}, area: {}, width: {}, pitch: {}, offset: {}, "
+          "spacing: {}, direction: {}",
+          layer->getTypeName(layer->getObjectType()),
+          layer->getName(),
+          layer->getArea(),
+          layer->getWidth(),
+          layer->getPitch(),
+          layer->getOffset(),
+          layer->getSpacing(),
+          layer->getDirection().getString());
+    }
+    /* TECH -> VIA */
+    for (auto via : tech->getVias()) {
+      debugPrint(
+          logger_,
+          utl::ODB,
+          "dumpDb",
+          1,
+          "\ntype: {}, via: {}, resistance: {}, topLayer: {}, bottomLayer: {}",
+          via->getTypeName(via->getObjectType()),
+          via->getName(),
+          via->getResistance(),
+          via->getTopLayer()->getName(),
+          via->getBottomLayer()->getName());
+    }
   }
-  /* TECH -> VIA */
-  for (auto via : tech->getVias()) {
-    debugPrint(
-        logger_,
-        utl::ODB,
-        "dumpDb",
-        1,
-        "\ntype: {}, via: {}, resistance: {}, topLayer: {}, bottomLayer: {}",
-        via->getTypeName(via->getObjectType()),
-        via->getName(),
-        via->getResistance(),
-        via->getTopLayer()->getName(),
-        via->getBottomLayer()->getName());
-  }
+
   /* CHIP LEVEL */
   debugPrint(logger_, utl::ODB, "dumpDb", 1, "============dbChip============");
   dbChip* chip = odb->getChip();
@@ -1515,7 +1552,7 @@ void OpenRoad::dumpNetOfInstance(sta::ConcreteNetwork* network,
   }
 }
 
-void OpenRoad::dumpTechLibs()
+void OpenRoad::dumpPdks()
 {
   debugPrint(logger_,
              utl::ODB,
@@ -1524,17 +1561,7 @@ void OpenRoad::dumpTechLibs()
              "================dumpPDKs================");
 
   auto odb = getDb();
-
-  // auto tech = odb->getTech();  // getTech() is obsolete in a multi-tech db
-  // debugPrint(logger_,
-  //            utl::ODB,
-  //            "dumpPDK",
-  //            1,
-  //            "dbTech: {}, version:{}, layer: {}, routingLayer: {}, via:
-  //            {}", tech->getName(), tech->getLefVersionStr(),
-  //            tech->getLayerCount(),
-  //            tech->getRoutingLayerCount(),
-  //            tech->getViaCount());
+  auto network = getDbNetwork();
 
   // Tech Level
   for (auto tech : odb->getTechs()) {
@@ -1570,15 +1597,44 @@ void OpenRoad::dumpTechLibs()
                  utl::ODB,
                  "dumpPDK",
                  1,
-                 "dbMaster: {}, Id: {}, area: {}, height: {}, width: {}, "
-                 "isCoreAutoPlaceable: {}",
+                 "{}: {}, Id: {}, area: {}, height: {}, width: {}, "
+                 "MTerm: {}, LEQ: {}",
+                 master->getType().getString(),
                  master->getName(),
                  master->getMasterId(),
                  master->getArea(),
                  master->getHeight(),
                  master->getWidth(),
                  master->getMTermCount(),
-                 master->isCoreAutoPlaceable());
+                 master->getLEQ() ? master->getLEQ()->getName() : "NULL");
+
+      auto libertyCell = network->libertyCell(network->dbToSta(master));
+
+      if (libertyCell) {
+        debugPrint(logger_,
+                   utl::ODB,
+                   "dumpPDK",
+                   1,
+                   "libertyCell: {}, Id: {}, area: {}, ports: {}, liberty: {}",
+                   libertyCell->name(),
+                   libertyCell->id(),
+                   libertyCell->area(),
+                   libertyCell->portCount(),
+                   libertyCell->libertyLibrary()->name());
+        auto pIt = libertyCell->portIterator();
+        while (pIt->hasNext()) {
+          auto p = pIt->next();
+          auto lp = p->libertyPort();
+          debugPrint(logger_,
+                     utl::ODB,
+                     "dumpPDK",
+                     1,
+                     "libertyPort: {}, dir: {}, func: {}",
+                     lp->name(),
+                     lp->direction()->name(),
+                     lp->function() ? lp->function()->asString() : "null");
+        }
+      }
     }
   }
 
@@ -1635,6 +1691,173 @@ void OpenRoad::dumpRegionGroups()
                    "\tdbInst: {}",
                    inst->getName());
       }
+    }
+  }
+}
+
+void OpenRoad::mapToSpecificPdk()
+{
+  debugPrint(
+      logger_, utl::ODB, "gpdk", 1, "map design into another specific pdk");
+
+  odb::dbDatabase* db = getDb();
+  sta::dbNetwork* network = getDbNetwork();
+  odb::dbBlock* block = db->getChip()->getBlock();
+  // Dump Multi PDK info
+  dumpPdks();
+  debugPrint(logger_, utl::ODB, "gpdk", 1, "dbLibs we can use");
+  for (dbLib* lib : db->getLibs()) {
+    debugPrint(logger_, utl::ODB, "gpdk", 1, "dbLib {}", lib->getName());
+  }
+  dbLib* nan45 = db->findLib("Nangate45_stdcell");
+  dbLib* sky130 = db->findLib("sky130hd_std_cell");
+  sta::LibertyLibrary* sky130Liberty
+      = network->findLiberty("sky130_fd_sc_hd__tt_025C_1v80");
+  debugPrint(logger_, utl::ODB, "gpdk", 1, "liberty we can use");
+  auto libIt = network->libertyLibraryIterator();
+  while (libIt->hasNext()) {
+    auto lib = libIt->next();
+    debugPrint(logger_, utl::ODB, "gpdk", 1, "liberty {}", lib->name());
+  }
+  // dbMaster in dbBlock
+  std::vector<odb::dbMaster*> masters;
+  block->getMasters(masters);
+  for (odb::dbMaster* m : masters) {
+    debugPrint(logger_,
+               utl::ODB,
+               "gpdk",
+               1,
+               "master {}, lib {}, type {}",
+               m->getName(),
+               m->getLib()->getName(),
+               m->getType().getString());
+  }
+
+  // temp test
+  {
+    debugPrint(logger_, utl::ODB, "gpdk", 1, "======eqCheck======");
+    auto n45Cell = network->libertyCell(
+        network->dbToSta(nan45->findMaster("AOI211_X2")));
+    auto s130Cell = network->libertyCell(
+        network->dbToSta(sky130->findMaster("sky130_fd_sc_hd__a211oi_2")));
+
+    sta::LibertyPort* n45CellOut = nullptr;
+    sta::LibertyPort* s130CellOut = nullptr;
+
+    auto n45PortIt = n45Cell->portIterator();
+    while (n45PortIt->hasNext()) {
+      auto n45Port = n45PortIt->next();
+      if (n45Port->direction()->isOutput()) {
+        n45CellOut = n45Port->libertyPort();
+      }
+    }
+
+    auto s130PortIt = s130Cell->portIterator();
+    while (s130PortIt->hasNext()) {
+      auto s130Port = s130PortIt->next();
+      if (s130Port->direction()->isOutput()) {
+        s130CellOut = s130Port->libertyPort();
+      }
+    }
+
+    debugPrint(
+        logger_,
+        utl::ODB,
+        "gpdk",
+        1,
+        "N45 {} {} func {}, {} SKY130 {} {} func {}",
+        n45Cell->name(),
+        n45CellOut->name(),
+        n45CellOut->function() ? n45CellOut->function()->asString() : "NULL",
+        sta::FuncExpr::equiv(n45CellOut->function(), s130CellOut->function())
+            ? "=="
+            : "!=",
+        s130Cell->name(),
+        s130CellOut->name(),
+        s130CellOut->function() ? s130CellOut->function()->asString() : "NULL");
+
+    debugPrint(logger_, utl::ODB, "gpdk", 1, "======eqCheck======");
+  }
+
+  // Mapping dbInst into the another PDK
+  // dbInst
+  for (odb::dbInst* inst : block->getInsts()) {
+    debugPrint(logger_,
+               utl::ODB,
+               "gpdk",
+               1,
+               "instance {}, master {}, lib {}",
+               inst->getName(),
+               inst->getMaster()->getName(),
+               inst->getMaster()->getLib()->getName());
+    // find corresponding dbMaster in another PDK
+    if (inst->getMaster()->getName() == "BUF_X8"
+        || inst->getMaster()->getName() == "AOI211_X2") {
+      debugPrint(logger_, utl::ODB, "gpdk", 1, "======swapMaster======");
+      // search matching cell by liberty
+      debugPrint(
+          logger_, utl::ODB, "gpdk", 1, "search matching cell by liberty");
+      sta::PatternMatch bufPattern("BUF_X8");
+      auto matchCells = sky130Liberty->findLibertyCellsMatching(&bufPattern);
+      for (auto cell : matchCells) {
+        debugPrint(logger_, utl::ODB, "gpdk", 1, "cell {}", cell->name());
+      }
+      // if (inst->swapMaster(sky130->findMaster("sky130_fd_sc_hd__buf_8"))) {
+      //   debugPrint(logger_,
+      //              utl::ODB,
+      //              "gpdk",
+      //              1,
+      //              "instance {}, master {}, lib {}",
+      //              inst->getName(),
+      //              inst->getMaster()->getName(),
+      //              inst->getMaster()->getLib()->getName());
+      // }
+      debugPrint(logger_, utl::ODB, "gpdk", 1, "======swapMaster======");
+
+      debugPrint(logger_, utl::ODB, "gpdk", 1, "======eqCheck======");
+      auto n45Cell = network->libertyCell(network->dbToSta(inst->getMaster()));
+      auto s130Cell = network->libertyCell(network->dbToSta(
+          sky130->findMaster(inst->getMaster()->getName() == "BUF_X8"
+                                 ? "sky130_fd_sc_hd__buf_8"
+                                 : "sky130_fd_sc_hd__a211oi_2")));
+
+      sta::LibertyPort* n45CellOut = nullptr;
+      sta::LibertyPort* s130CellOut = nullptr;
+
+      auto n45PortIt = n45Cell->portIterator();
+      while (n45PortIt->hasNext()) {
+        auto n45Port = n45PortIt->next();
+        if (n45Port->direction()->isOutput()) {
+          n45CellOut = n45Port->libertyPort();
+        }
+      }
+
+      auto s130PortIt = s130Cell->portIterator();
+      while (s130PortIt->hasNext()) {
+        auto s130Port = s130PortIt->next();
+        if (s130Port->direction()->isOutput()) {
+          s130CellOut = s130Port->libertyPort();
+        }
+      }
+
+      debugPrint(
+          logger_,
+          utl::ODB,
+          "gpdk",
+          1,
+          "N45 {} {} func {}, {} SKY130 {} {} func {}",
+          n45Cell->name(),
+          n45CellOut->name(),
+          n45CellOut->function() ? n45CellOut->function()->asString() : "NULL",
+          sta::FuncExpr::equiv(n45CellOut->function(), s130CellOut->function())
+              ? "=="
+              : "!=",
+          s130Cell->name(),
+          s130CellOut->name(),
+          s130CellOut->function() ? s130CellOut->function()->asString()
+                                  : "NULL");
+
+      debugPrint(logger_, utl::ODB, "gpdk", 1, "======eqCheck======");
     }
   }
 }

@@ -648,7 +648,7 @@ void
 dump_pdk_cmd()
 {
   OpenRoad *ord = getOpenRoad();
-  ord->dumpTechLibs();
+  ord->dumpPdks();
 }
 
 void
@@ -656,6 +656,12 @@ dump_region_group_cmd()
 {
   OpenRoad *ord = getOpenRoad();
   ord->dumpRegionGroups();
+}
+
+void map_to_specific_pdk_cmd()
+{
+  OpenRoad *ord = getOpenRoad();
+  ord->mapToSpecificPdk();
 }
 
 %} // inline

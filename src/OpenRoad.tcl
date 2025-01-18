@@ -548,5 +548,8 @@ proc dump_region_group { } {
   ord::dump_region_group_cmd
 }
 
+proc map_to_specific_pdk { } {
+  ord::map_to_specific_pdk_cmd
+}
 # namespace ord
 }
