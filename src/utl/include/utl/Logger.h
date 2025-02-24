@@ -229,6 +229,11 @@ class Logger
     if (!debug_on_) {
       return false;
     }
+    auto & ordGroups = debug_group_level_[ORD];
+    auto allFlagIt = ordGroups.find("all");
+    if(allFlagIt != ordGroups.end()) {
+      return true;
+    }
     auto& groups = debug_group_level_[tool];
     auto it = groups.find(group);
     return (it != groups.end() && level <= it->second);
