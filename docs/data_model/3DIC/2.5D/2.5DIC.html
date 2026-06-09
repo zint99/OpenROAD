@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.5D Chiplets Architecture</title>
+    <style>
+        /* CSS reset and basic styling */
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 2rem;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* SVG interactive styling */
+        svg {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            height: auto;
+        }
+
+        .interactive-layer {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .interactive-layer:hover {
+            filter: brightness(0.9);
+            stroke: #3b82f6;
+            stroke-width: 2px;
+        }
+
+        /* Info panel styling */
+        .info-panel {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 120px;
+        }
+
+        .info-panel h3 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+
+        .info-panel p {
+            color: #4b5563;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="rdl-pattern" width="10" height="10" patternUnits="userSpaceOnUse">
+                    <path d="M 0 5 L 10 5 M 5 0 L 5 10" stroke="#cbd5e1" stroke-width="1" />
+                </pattern>
+            </defs>
+
+            <g class="interactive-layer" data-title="PCB / 主板 (Motherboard)" data-desc="系统的基础印刷电路板，负责提供全局的电源输入和宏观的系统级外部信号交互。">
+                <rect x="50" y="420" width="700" height="40" fill="#22c55e" rx="4" />
+                <text x="400" y="445" font-size="16" fill="white" text-anchor="middle">PCB / Motherboard</text>
+            </g>
+
+            <g class="interactive-layer" data-title="BGA 焊球 (Solder Balls)" data-desc="将整个 2.5D 封装模块固定到主板上的大尺寸焊球，间距通常在 0.5mm 到 1mm 之间。">
+                <script type="text/javascript">
+                    // Using simple shapes in SVG directly, simulated by repeating elements
+                </script>
+                <circle cx="100" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="150" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="200" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="250" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="300" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="350" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="400" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="450" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="500" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="550" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="600" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="650" cy="410" r="8" fill="#94a3b8" />
+                <circle cx="700" cy="410" r="8" fill="#94a3b8" />
+            </g>
+
+            <g class="interactive-layer" data-title="封装基板 (Package Substrate)" data-desc="由有机材料（如 ABF 树脂）制成，负责将硅中介层的高密度引脚扇出（Fan-out）到间距更大的 BGA 焊球上，同时包含粗略的供电网络。">
+                <rect x="80" y="340" width="640" height="60" fill="#0284c7" rx="4" />
+                <text x="400" y="375" font-size="16" fill="white" text-anchor="middle">Package Substrate</text>
+            </g>
+
+            <g class="interactive-layer" data-title="C4 凸块 (C4 Bumps / Flip-Chip Bumps)" data-desc="连接硅中介层与封装基板的倒装焊凸块，尺寸介于微凸块和 BGA 焊球之间，主要负责传输电源和系统级 I/O 信号。">
+                <circle cx="130" cy="330" r="6" fill="#fbbf24" />
+                <circle cx="220" cy="330" r="6" fill="#fbbf24" />
+                <circle cx="310" cy="330" r="6" fill="#fbbf24" />
+                <circle cx="400" cy="330" r="6" fill="#fbbf24" />
+                <circle cx="490" cy="330" r="6" fill="#fbbf24" />
+                <circle cx="580" cy="330" r="6" fill="#fbbf24" />
+                <circle cx="670" cy="330" r="6" fill="#fbbf24" />
+            </g>
+
+            <g class="interactive-layer" data-title="硅中介层 (Silicon Interposer)" data-desc="2.5D 封装的核心无源硅片。提供超高密度的布线空间，使得处于同一平面的各个 Chiplet 能够以极高的带宽相互通信。">
+                <rect x="110" y="180" width="580" height="140" fill="#cbd5e1" rx="4" />
+                <text x="400" y="270" font-size="16" fill="#334155" text-anchor="middle">Silicon Interposer</text>
+            </g>
+
+            <g class="interactive-layer" data-title="硅通孔 (TSV, Through-Silicon Via)" data-desc="垂直穿透硅中介层的微小导电通道。它们将封装基板传来的电源和外部信号直接输送到中介层顶部的 RDL 和 Chiplet 中。">
+                <rect x="150" y="220" width="8" height="100" fill="#ef4444" />
+                <rect x="250" y="220" width="8" height="100" fill="#ef4444" />
+                <rect x="350" y="220" width="8" height="100" fill="#ef4444" />
+                <rect x="450" y="220" width="8" height="100" fill="#ef4444" />
+                <rect x="550" y="220" width="8" height="100" fill="#ef4444" />
+                <rect x="650" y="220" width="8" height="100" fill="#ef4444" />
+                <text x="400" y="310" font-size="12" fill="#ef4444" text-anchor="middle">TSV Channels</text>
+            </g>
+
+            <g class="interactive-layer" data-title="重新布线层 (RDL, Re-Distribution Layer)" data-desc="位于硅中介层最顶部的几层高密度金属走线层。专用于实现 Chiplet 之间的微距、高速、宽总线通信（例如 CPU 与 HBM 之间的数据互连）。">
+                <rect x="110" y="180" width="580" height="40" fill="url(#rdl-pattern)" />
+                <rect x="110" y="180" width="580" height="40" fill="rgba(148, 163, 184, 0.5)" />
+                <text x="400" y="205" font-size="14" fill="#1e293b" text-anchor="middle">High-Density RDL</text>
+            </g>
+
+            <g class="interactive-layer" data-title="微凸块 (Microbumps)" data-desc="连接顶层 Chiplet 和下方硅中介层 RDL 的极细微互连节点。直径通常在数十微米级别，密度极高。">
+                <circle cx="160" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="190" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="220" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="250" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="280" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="310" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="340" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="460" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="490" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="520" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="550" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="580" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="610" cy="170" r="4" fill="#f59e0b" />
+                <circle cx="640" cy="170" r="4" fill="#f59e0b" />
+            </g>
+
+            <g class="interactive-layer" data-title="逻辑芯粒 (Logic Chiplet - CPU/GPU)" data-desc="负责执行高性能计算的裸片，通常采用最先进的半导体工艺制程（如 3nm/5nm）制造，以提供最大的算力密度。">
+                <rect x="140" y="60" width="220" height="100" fill="#6366f1" rx="4" />
+                <text x="250" y="115" font-size="18" fill="white" text-anchor="middle">Compute Chiplet</text>
+                <text x="250" y="135" font-size="14" fill="#e0e7ff" text-anchor="middle">(CPU / GPU)</text>
+            </g>
+
+            <g class="interactive-layer" data-title="高带宽内存 (Memory Chiplet - HBM)" data-desc="与逻辑核心就近并排布置的存储器堆叠栈。通过中介层极宽的数据总线与计算核心相连，从而打破内存墙的瓶颈。">
+                <rect x="440" y="60" width="220" height="100" fill="#8b5cf6" rx="4" />
+                <text x="550" y="115" font-size="18" fill="white" text-anchor="middle">Memory Chiplet</text>
+                <text x="550" y="135" font-size="14" fill="#ede9fe" text-anchor="middle">(HBM Stack)</text>
+            </g>
+
+        </svg>
+
+        <div class="info-panel" id="infoPanel">
+            <h3>2.5D Chiplets 交互式探索</h3>
+            <p>请将鼠标悬停或点击图中的各个层级（例如：Chiplet、硅中介层、TSV），这里将显示该物理组件的技术定义及其在 2.5D 封装架构中的作用。</p>
+        </div>
+    </div>
+
+    <script>
+        // Select all interactive SVG elements
+        const layers = document.querySelectorAll('.interactive-layer');
+        const infoPanel = document.getElementById('infoPanel');
+
+        // Add event listeners for hover and click interactions
+        layers.forEach(layer => {
+            const handleInteraction = () => {
+                const title = layer.getAttribute('data-title');
+                const desc = layer.getAttribute('data-desc');
+                
+                // Update the DOM with the component's data
+                infoPanel.innerHTML = `
+                    <h3>${title}</h3>
+                    <p>${desc}</p>
+                `;
+            };
+
+            // Trigger update on mouse enter and click (for mobile support)
+            layer.addEventListener('mouseenter', handleInteraction);
+            layer.addEventListener('click', handleInteraction);
+            
+            // Reset info panel when mouse leaves
+            layer.addEventListener('mouseleave', () => {
+                infoPanel.innerHTML = `
+                    <h3>2.5D Chiplets 交互式探索</h3>
+                    <p>请将鼠标悬停或点击图中的各个层级（例如：Chiplet、硅中介层、TSV），这里将显示该物理组件的技术定义及其在 2.5D 封装架构中的作用。</p>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
