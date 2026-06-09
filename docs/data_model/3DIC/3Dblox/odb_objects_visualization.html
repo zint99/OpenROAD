@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3DBlox ODB 对象可视化</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --ink: #16202a;
+      --muted: #596672;
+      --line: #c7d0d9;
+      --panel: #ffffff;
+      --panel-2: #eef3f7;
+      --chip: #d8ecff;
+      --chip-border: #4384bd;
+      --region: #e9f7df;
+      --region-border: #6a9d45;
+      --bump: #ffe4b8;
+      --bump-border: #b97716;
+      --net: #eadfff;
+      --net-border: #7b5fb2;
+      --warn: #fff1cc;
+      --warn-border: #b48918;
+      --shadow: 0 1px 2px rgba(20, 30, 40, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.48 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    header {
+      padding: 18px 22px 10px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 980px;
+    }
+
+    main {
+      padding: 16px 22px 24px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .toolbar button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .toolbar button[aria-pressed="true"] {
+      background: #1c5d89;
+      border-color: #1c5d89;
+      color: #fff;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .section h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      color: var(--muted);
+      margin: 8px 0 12px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .swatch {
+      width: 13px;
+      height: 13px;
+      border-radius: 3px;
+      border: 1px solid var(--line);
+    }
+
+    .swatch.chip { background: var(--chip); border-color: var(--chip-border); }
+    .swatch.region { background: var(--region); border-color: var(--region-border); }
+    .swatch.bump { background: var(--bump); border-color: var(--bump-border); }
+    .swatch.net { background: var(--net); border-color: var(--net-border); }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lane {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 180px;
+      background: #fbfcfd;
+    }
+
+    .lane h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #203040;
+    }
+
+    .node {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      padding: 8px 9px;
+      margin: 7px 0;
+      min-height: 40px;
+    }
+
+    .node strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .node small {
+      display: block;
+      color: var(--muted);
+      margin-top: 3px;
+      overflow-wrap: anywhere;
+    }
+
+    .node.chip {
+      background: var(--chip);
+      border-color: var(--chip-border);
+    }
+
+    .node.region {
+      background: var(--region);
+      border-color: var(--region-border);
+    }
+
+    .node.bump {
+      background: var(--bump);
+      border-color: var(--bump-border);
+    }
+
+    .node.net {
+      background: var(--net);
+      border-color: var(--net-border);
+    }
+
+    .node.warn {
+      background: var(--warn);
+      border-color: var(--warn-border);
+    }
+
+    .arrow {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 1px 0;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr 38px 1fr 38px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .flow .arrow {
+      font-size: 22px;
+      color: #446171;
+    }
+
+    .stack-stage {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .die {
+      border: 2px solid #5d7386;
+      background: #ffffff;
+      min-height: 230px;
+      position: relative;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .die-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .surface {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      height: 26px;
+      border: 1px dashed #788895;
+      background: #f3f8fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #425361;
+      font-size: 12px;
+      border-radius: 5px;
+    }
+
+    .surface.bottom {
+      bottom: 12px;
+    }
+
+    .surface.top {
+      top: 12px;
+    }
+
+    .die-content {
+      margin-top: 46px;
+      display: grid;
+      gap: 6px;
+      max-width: 360px;
+    }
+
+    .die.bottom-die .die-content {
+      margin-top: 52px;
+    }
+
+    .v-connection {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 56px;
+      color: #255775;
+      font-weight: 700;
+      gap: 12px;
+    }
+
+    .v-connection .line {
+      width: 2px;
+      height: 42px;
+      background: #255775;
+      position: relative;
+    }
+
+    .v-connection .line::after {
+      content: "";
+      position: absolute;
+      left: -5px;
+      bottom: -1px;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid #255775;
+    }
+
+    .callout {
+      border-left: 4px solid #1c5d89;
+      background: #eef6fb;
+      padding: 9px 11px;
+      border-radius: 4px;
+      color: #24394a;
+      margin-top: 10px;
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: minmax(160px, 0.75fr) repeat(3, minmax(160px, 1fr));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .matrix div {
+      padding: 9px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      min-height: 44px;
+    }
+
+    .matrix div:nth-child(4n) {
+      border-right: 0;
+    }
+
+    .matrix .head {
+      background: #edf2f7;
+      font-weight: 700;
+    }
+
+    .matrix .last-row {
+      border-bottom: 0;
+    }
+
+    code {
+      background: #edf2f7;
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.95em;
+    }
+
+    .footnote {
+      color: var(--muted);
+      margin: 10px 0 0;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .zone {
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+      padding: 8px;
+      background: #fbfdff;
+    }
+
+    .zone-title {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .port-marker {
+      border: 2px solid var(--bump-border);
+      background: var(--bump);
+      border-radius: 6px;
+      padding: 7px 8px;
+      text-align: center;
+      font-weight: 700;
+      min-height: 38px;
+    }
+
+    .connection-band {
+      display: grid;
+      grid-template-columns: 1fr 2px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 8px 0;
+      min-height: 70px;
+    }
+
+    .connection-band .rail {
+      width: 2px;
+      height: 64px;
+      background: #255775;
+      justify-self: center;
+      position: relative;
+    }
+
+    .connection-band .rail::before,
+    .connection-band .rail::after {
+      content: "";
+      position: absolute;
+      left: -5px;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+    }
+
+    .connection-band .rail::before {
+      top: -1px;
+      border-bottom: 8px solid #255775;
+    }
+
+    .connection-band .rail::after {
+      bottom: -1px;
+      border-top: 8px solid #255775;
+    }
+
+    .mini-note {
+      font-size: 12px;
+      color: var(--muted);
+      background: #f5f8fa;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 7px;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        padding: 12px;
+      }
+
+      .grid.three,
+      .grid.two,
+      .split,
+      .connection-band,
+      .stack-stage {
+        grid-template-columns: 1fr;
+      }
+
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .flow .arrow {
+        transform: rotate(90deg);
+      }
+
+      .matrix {
+        grid-template-columns: 1fr;
+      }
+
+      .matrix div,
+      .matrix div:nth-child(4n) {
+        border-right: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>3DBlox ODB 对象可视化</h1>
+    <p>该页面演示 `dbChip` 相关对象的层级、bump master/occurrence 关系，以及 `dbNet`、`dbChipNet`、`dbBTerm`、`dbITerm` 的边界。</p>
+  </header>
+
+  <main>
+    <nav class="toolbar" aria-label="视图选择">
+      <button type="button" data-view="map" aria-pressed="true">对象地图</button>
+      <button type="button" data-view="bump" aria-pressed="false">Bump 两层模型</button>
+      <button type="button" data-view="stack" aria-pressed="false">双 DIE 堆叠</button>
+      <button type="button" data-view="terms" aria-pressed="false">Net 与 Term</button>
+    </nav>
+
+    <section id="map" class="view active">
+      <div class="section">
+        <h2>从输入文件到 ODB 对象</h2>
+        <div class="legend">
+          <span><i class="swatch chip"></i>chip-level</span>
+          <span><i class="swatch region"></i>region-level</span>
+          <span><i class="swatch bump"></i>bump-level</span>
+          <span><i class="swatch net"></i>connectivity</span>
+        </div>
+        <div class="flow">
+          <div class="lane">
+            <h3>`.3dbv` chiplet definition</h3>
+            <div class="node chip"><strong>dbChip</strong><small>DIE / RDL / IP / SUBSTRATE / HIER</small></div>
+            <div class="node"><strong>dbBlock</strong><small>传统 block 视图</small></div>
+            <div class="node region"><strong>dbChipRegion</strong><small>front / back / internal</small></div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="lane">
+            <h3>`.bmap` bump entries</h3>
+            <div class="node"><strong>dbInst</strong><small>bump cell instance in master block</small></div>
+            <div class="node bump"><strong>dbChipBump</strong><small>master region 上的 bump entry</small></div>
+            <div class="node net"><strong>dbNet / dbBTerm / dbITerm</strong><small>chiplet block 内部连接</small></div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="lane">
+            <h3>`.3dbx` assembly</h3>
+            <div class="node chip"><strong>dbChipInst</strong><small>实例化 master dbChip</small></div>
+            <div class="node region"><strong>dbChipRegionInst</strong><small>自动生成 region occurrence</small></div>
+            <div class="node bump"><strong>dbChipBumpInst</strong><small>自动生成 bump occurrence</small></div>
+            <div class="node net"><strong>dbChipConn / dbChipNet</strong><small>装配层物理连接和逻辑 net</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="bump" class="view">
+      <div class="section">
+        <h2>Bump 的 master 与 occurrence</h2>
+        <div class="grid two">
+          <div class="lane">
+            <h3>Master chiplet: SoC</h3>
+            <div class="node chip"><strong>dbChip SoC</strong><small>来自 `.3dbv`</small></div>
+            <div class="arrow">contains</div>
+            <div class="node region"><strong>dbChipRegion bottom_region</strong><small>连接面/区域</small></div>
+            <div class="arrow">contains</div>
+            <div class="node bump"><strong>dbChipBump A1</strong><small>来自 `.bmap` 行</small></div>
+            <div class="arrow">references</div>
+            <div class="node"><strong>dbInst A1_bump_inst</strong><small>master block 内的 bump cell</small></div>
+            <div class="node net"><strong>dbNet SIG + dbBTerm SIG_PORT</strong><small>master block 内部 net/port</small></div>
+          </div>
+
+          <div class="lane">
+            <h3>Assembly: TopDesign</h3>
+            <div class="node chip"><strong>dbChipInst soc0</strong><small>master = SoC</small></div>
+            <div class="arrow">auto creates</div>
+            <div class="node region"><strong>dbChipRegionInst soc0/bottom_region</strong><small>points to master region</small></div>
+            <div class="arrow">auto creates</div>
+            <div class="node bump"><strong>dbChipBumpInst soc0/A1</strong><small>points to master dbChipBump A1</small></div>
+            <div class="node chip"><strong>dbChipInst soc1</strong><small>master = SoC</small></div>
+            <div class="node bump"><strong>dbChipBumpInst soc1/A1</strong><small>also points to master dbChipBump A1</small></div>
+          </div>
+        </div>
+        <div class="callout">
+          多个 `dbChipBumpInst` 可以引用同一个 `dbChipBump`。这表示共享 master bump definition，不表示共享同一个装配中的物理 occurrence。
+        </div>
+        <div class="grid two" style="margin-top:12px">
+          <div class="node warn">
+            <strong>不要这样理解</strong>
+            <small>`soc0/A1` 和 `soc1/A1` 不是两个独立的 master `dbInst`；调用 `getChipBump()->getInst()` 会回到同一个 master block 内的 bump cell。</small>
+          </div>
+          <div class="node region">
+            <strong>应该这样理解</strong>
+            <small>不同 occurrence 的实际位置由 `dbChipInst` transform + master bump local location 在 `UnfoldedModel` 中推导。</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack" class="view">
+      <div class="section">
+        <h2>两个 DIE 垂直堆叠</h2>
+        <div class="stack-stage">
+          <div>
+            <div class="die">
+              <div class="die-title">dbChipInst top_die</div>
+              <div class="die-content">
+                <div class="split">
+                  <div class="zone">
+                    <div class="zone-title">block-internal implementation</div>
+                    <div class="node"><strong>dbInst top_bump</strong><small>master bump cell</small></div>
+                    <div class="node"><strong>dbITerm PAD</strong><small>内部 instance pin</small></div>
+                    <div class="node net"><strong>dbNet TOP_SIG</strong><small>local logical net，无几何位置</small></div>
+                  </div>
+                  <div class="zone">
+                    <div class="zone-title">surface/formal endpoint</div>
+                    <div class="node bump"><strong>dbChipBumpInst top_die/A1</strong><small>assembly occurrence</small></div>
+                    <div class="port-marker">dbBTerm TOP_OUT</div>
+                  </div>
+                </div>
+              </div>
+              <div class="surface bottom">bottom-facing dbChipRegionInst</div>
+            </div>
+            <div class="connection-band">
+              <div class="mini-note">`dbChipNet` endpoint:<br>path=[top_die], bump_inst=top_die/A1</div>
+              <div class="rail"></div>
+              <div class="mini-note">`dbChipConn` endpoint:<br>bottom-facing region ↔ top-facing region</div>
+            </div>
+            <div class="die bottom-die">
+              <div class="surface top">top-facing dbChipRegionInst</div>
+              <div class="die-title">dbChipInst bot_die</div>
+              <div class="die-content">
+                <div class="split">
+                  <div class="zone">
+                    <div class="zone-title">surface/formal endpoint</div>
+                    <div class="port-marker">dbBTerm BOT_IN</div>
+                    <div class="node bump"><strong>dbChipBumpInst bot_die/A1</strong><small>assembly occurrence</small></div>
+                  </div>
+                  <div class="zone">
+                    <div class="zone-title">block-internal implementation</div>
+                    <div class="node"><strong>dbInst bot_bump</strong><small>master bump cell</small></div>
+                    <div class="node"><strong>dbITerm PAD</strong><small>内部 instance pin</small></div>
+                    <div class="node net"><strong>dbNet BOT_SIG</strong><small>local logical net，无几何位置</small></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lane">
+            <h3>连接表达</h3>
+            <div class="node net"><strong>dbChipNet SIG_TOP</strong><small>assembly 层逻辑 net</small></div>
+            <div class="arrow">endpoint</div>
+            <div class="node bump"><strong>path=[top_die], bump_inst=top_die/A1</strong><small>不是 master dbNet</small></div>
+            <div class="arrow">endpoint</div>
+            <div class="node bump"><strong>path=[bot_die], bump_inst=bot_die/A1</strong><small>不是 master dbNet</small></div>
+            <div class="node region"><strong>dbChipConn die_to_die</strong><small>region-to-region physical connection</small></div>
+            <div class="callout">
+              朝外端口是 `dbBTerm`。`dbITerm` 是 bump cell 的内部 instance pin。跨 DIE 时，两个 chiplet block 内的 `dbNet` 不会被合并；顶层连接通过 `dbChipNet` 记录 occurrence endpoint，通过 `dbChipConn` 记录 region-level 物理关系。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="terms" class="view">
+      <div class="section">
+        <h2>dbNet、dbChipNet、dbBTerm、dbITerm 的边界</h2>
+        <div class="grid two">
+          <div class="lane">
+            <h3>chiplet block 内部</h3>
+            <div class="node net"><strong>dbNet SIG</strong><small>没有位置，只是连接集合</small></div>
+            <div class="arrow">connects</div>
+            <div class="node"><strong>dbBTerm SIG_PORT</strong><small>block/chip formal port，对外语义</small></div>
+            <div class="node"><strong>dbITerm bump/PAD</strong><small>dbInst 的实例端口，内部 pin</small></div>
+            <div class="node bump"><strong>dbChipBump</strong><small>额外保存 bump -> dbNet/dbBTerm/dbInst 语义关联</small></div>
+          </div>
+          <div class="lane">
+            <h3>assembly 层</h3>
+            <div class="node net"><strong>dbChipNet SIG_TOP</strong><small>连接 bump occurrence</small></div>
+            <div class="arrow">stores</div>
+            <div class="node bump"><strong>vector&lt;dbChipInst*&gt; path</strong><small>定位到具体 chip instance</small></div>
+            <div class="node bump"><strong>dbChipBumpInst*</strong><small>定位到具体 bump occurrence</small></div>
+            <div class="node region"><strong>UnfoldedModel</strong><small>根据 path + transform 计算全局位置</small></div>
+          </div>
+        </div>
+
+        <div class="matrix" aria-label="对象职责矩阵">
+          <div class="head">对象</div>
+          <div class="head">层级</div>
+          <div class="head">是否有位置</div>
+          <div class="head">连接对象</div>
+          <div>`dbNet`</div>
+          <div>chiplet `dbBlock`</div>
+          <div>无</div>
+          <div>`dbBTerm`、`dbITerm`</div>
+          <div>`dbChipNet`</div>
+          <div>assembly `dbChip`</div>
+          <div>无</div>
+          <div>`dbChipBumpInst` + path</div>
+          <div>`dbBTerm`</div>
+          <div>chiplet `dbBlock`</div>
+          <div>可有 bpin 几何；对外语义由 bump/region 解释</div>
+          <div>`dbNet`，可反查 `dbChipBump`</div>
+          <div class="last-row">`dbITerm`</div>
+          <div class="last-row">`dbInst`</div>
+          <div class="last-row">由 master pin + inst transform 推导</div>
+          <div class="last-row">`dbNet`</div>
+        </div>
+        <p class="footnote">`dbNet` 和 `dbChipNet` 都没有几何位置。位置来自 `dbInst`、`dbChipRegion`、`dbChipInst` transform 和展开模型。</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const buttons = Array.from(document.querySelectorAll(".toolbar button"));
+    const views = Array.from(document.querySelectorAll(".view"));
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.view;
+        buttons.forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+        views.forEach((view) => {
+          view.classList.toggle("active", view.id === target);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
