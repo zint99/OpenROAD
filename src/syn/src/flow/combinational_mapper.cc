@@ -330,7 +330,7 @@ static void buildIndex(sta::Network* network,
       }
 
       // Register all NPN representatives
-      npn_semiclass_allrepr(
+      npnSemiclassAllRepr(
           func, inputs.size(), [&](const Truth6 repr, const NPN& npn) {
             index.classes[{(int) inputs.size(), repr}].push_back(
                 MapTarget{.cell = cell, .via = npn.inv()});
@@ -338,15 +338,15 @@ static void buildIndex(sta::Network* network,
     }
   }
 
-  // Prune targets: keep smallest cell per c_fingerprint
+  // Prune targets: keep smallest cell per cFingerprint
   for (auto& [key, targets] : index.classes) {
     std::ranges::sort(targets, [](const MapTarget& a, const MapTarget& b) {
-      return std::make_pair(a.via.c_fingerprint(), a.cell->area())
-             < std::make_pair(b.via.c_fingerprint(), b.cell->area());
+      return std::make_pair(a.via.cFingerprint(), a.cell->area())
+             < std::make_pair(b.via.cFingerprint(), b.cell->area());
     });
     auto unique_range = std::ranges::unique(
         targets, [](const MapTarget& a, const MapTarget& b) {
-          return a.via.c_fingerprint() == b.via.c_fingerprint();
+          return a.via.cFingerprint() == b.via.cFingerprint();
         });
     targets.erase(unique_range.begin(), targets.end());
   }
@@ -405,6 +405,8 @@ class Mapping
   using Literal = ControlNet;
 
   Mapping(utl::Logger* logger, const Subject& subject);
+
+  ClassMatch* reserveMatches(int n);
 
   ClassMatch* allocMatches(int n);
 
@@ -466,28 +468,38 @@ bool Mapping::isMappable(Net net)
   return isMappable(inst);
 }
 
-ClassMatch* Mapping::allocMatches(const int n)
+ClassMatch* Mapping::reserveMatches(const int n)
 {
+  assert(n <= kArenaChunk);
   if (arena_slot_ + n > kArenaChunk || match_arena_.empty()) {
     match_arena_.push_back(std::make_unique<ClassMatch[]>(kArenaChunk));
     arena_slot_ = 0;
   }
   ClassMatch* ret = &match_arena_.back()[arena_slot_];
+  // We are reserving but not allocating: do not increment arena_slot_
+  return ret;
+}
+
+ClassMatch* Mapping::allocMatches(const int n)
+{
+  assert(n <= kArenaChunk);
+  ClassMatch* ret = reserveMatches(n);
   arena_slot_ += n;
   return ret;
 }
 
 void Mapping::collectPrimaryOutputs()
 {
-  std::set<ControlNet> primaryOutputNets;
-  std::set<std::pair<ControlNet, Net>> fixupSet;
+  std::set<ControlNet> primary_output_nets;
+  std::set<std::pair<ControlNet, Net>> fixup_set;
 
   auto registerPrimaryOutput = [&](Net net) {
     auto cnet = subject_.stripInverter(net);
-    if (isMappable(cnet.net())) {
-      primaryOutputNets.insert(cnet);
+    auto driver = subject_.graph.resolve(cnet.net()).first;
+    if (isMappable(cnet.net()) || driver->isMapped()) {
+      primary_output_nets.insert(cnet);
       if (cnet.net() != net) {
-        fixupSet.insert({cnet, net});
+        fixup_set.insert({cnet, net});
       }
     }
   };
@@ -518,8 +530,9 @@ void Mapping::collectPrimaryOutputs()
     }
   });
 
-  primary_outputs_.assign(primaryOutputNets.begin(), primaryOutputNets.end());
-  primary_output_fixups_.assign(fixupSet.begin(), fixupSet.end());
+  primary_outputs_.assign(primary_output_nets.begin(),
+                          primary_output_nets.end());
+  primary_output_fixups_.assign(fixup_set.begin(), fixup_set.end());
 }
 
 void Mapping::computeFanouts()
@@ -673,7 +686,11 @@ void Mapping::prepareMatches(const int npriority_cuts,
 
     int matchSlot = 0;
     int psSlot = 0;
-    ClassMatch* matchBuf = allocMatches(nmatches_max);
+
+    // Conservatively reserve a buffer for the maximal number of matches.
+    // Later we will call `allocMatches` to allocate the used portion of
+    // the buffer. This way we don't overallocate and waste slots.
+    ClassMatch* matchBuf = reserveMatches(nmatches_max);
 
     for (int i = -1; i < (int) cache[n1->fid].ps.size(); i++) {
       for (int j = -1; j < (int) cache[n2->fid].ps.size(); j++) {
@@ -747,7 +764,7 @@ void Mapping::prepareMatches(const int npriority_cuts,
 
         // Try to match against library
         NPN npn;
-        Truth6 sc = npn_semiclass(cutFunction, reducedLen, npn);
+        Truth6 sc = npnSemiclass(cutFunction, reducedLen, npn);
         if (subject_.target_index->classes.contains({reducedLen, sc})) {
           if (matchSlot < nmatches_max) {
             ClassMatch& m = matchBuf[matchSlot];
@@ -783,6 +800,9 @@ void Mapping::prepareMatches(const int npriority_cuts,
     lcache->ps = std::span<PriorityCut>(
         &pcuts[static_cast<size_t>(cur->fid) * npriority_cuts], psSlot);
     lcache->mark = net;
+    ClassMatch* allocatedBuf = allocMatches(matchSlot);
+    (void) allocatedBuf;
+    assert(allocatedBuf == matchBuf);
     cur->matches = matchBuf;
     cur->nmatches = matchSlot;
   });

@@ -38,11 +38,22 @@ cc_library(
     name = "gpl",
     srcs = [
         "src/AbstractGraphics.cpp",
+        "src/backendContext.h",
+        "src/clockBase.cpp",
+        "src/clockBase.h",
+        "src/densityGradient.cpp",
+        "src/densityGradientBackend.h",
         "src/fft.cpp",
         "src/fft.h",
+        "src/fftBackend.h",
         "src/fftsg.cpp",
         "src/fftsg2d.cpp",
+        "src/gpu/deviceState.h",
+        "src/gpu/nesterovDeviceContext.h",
+        "src/gpu/regionDensityField.h",
         "src/graphicsNone.cpp",
+        "src/hpwl.cpp",
+        "src/hpwlBackend.h",
         "src/initialPlace.cpp",
         "src/initialPlace.h",
         "src/mbff.cpp",
@@ -55,6 +66,8 @@ cc_library(
         "src/solver.h",
         "src/timingBase.cpp",
         "src/timingBase.h",
+        "src/wirelengthGradient.cpp",
+        "src/wirelengthGradientBackend.h",
     ],
     hdrs = [
         "include/gpl/Replace.h",
@@ -79,8 +92,7 @@ cc_library(
         "//src/utl",
         "@abseil-cpp//absl/container:inlined_vector",
         "@boost.polygon",
-        "@boost.stacktrace",
-        "@boost.unordered",
+        "@boost.random",
         "@coin-or-lemon//:lemon",
         "@eigen",
         "@openmp",
@@ -210,5 +222,8 @@ filegroup(
 )
 
 messages_txt(
-    visibility = ["//src/gpl/test:__pkg__"],
+    visibility = [
+        "//docs:__pkg__",
+        "//src/gpl/test:__pkg__",
+    ],
 )
