@@ -440,6 +440,9 @@ bool RepairHold::repairHold(sta::VertexSeq& ends,
       logger_->warn(RSZ, 64, "Unable to repair all hold checks within margin.");
     }
 
+    if (resize_count_ > 0) {
+      logger_->info(RSZ, 132, "Resized {} instances.", resize_count_);
+    }
     if (inserted_buffer_count_ > 0) {
       repaired = true;
       logger_->info(
@@ -505,7 +508,6 @@ void RepairHold::repairHoldPass(sta::VertexSeq& hold_failures,
       printProgress(pass, false, false);
     }
 
-    estimate_parasitics_->updateParasitics();
     repairEndHold(end_vertex,
                   buffer_cell,
                   setup_margin,
