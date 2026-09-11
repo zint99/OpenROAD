@@ -28,6 +28,7 @@ include/ord/Version.hh
 build
 build_linux
 build_mac
+.openroad-local/
 test/results
 
 docs/main
