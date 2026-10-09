@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="面向新人的 OpenROAD initialize_floorplan 中文源码交互教程：边界、利用率、网格对齐、建行与多边形。">
+  <title>initialize_floorplan · 从边界到放置行</title>
+  <style>
+    :root { --paper:#f6f5f0; --ink:#203a40; --muted:#53686c; --line:#d7dfda; --green:#087f75; --blue:#4763b6; --orange:#b26325; --white:#fff; --soft:#e7f2ee; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; scroll-padding-top:85px; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.8 system-ui,-apple-system,"Segoe UI","Noto Sans CJK SC","Microsoft YaHei",sans-serif; }
+    a { color:var(--green); text-underline-offset:4px; }
+    button,input,select { font:inherit; }
+    button,select { cursor:pointer; }
+    button { color:var(--ink); border:1px solid var(--line); background:white; border-radius:7px; padding:8px 15px; }
+    button:hover { border-color:var(--green); }
+    button[aria-pressed="true"],button.primary { color:white; background:var(--green); border-color:var(--green); }
+    :focus-visible { outline:3px solid var(--orange); outline-offset:4px; }
+    header { position:sticky; top:0; z-index:10; background:#f6f5f0f5; border-bottom:1px solid var(--line); }
+    .nav { max-width:1180px; margin:auto; display:flex; align-items:center; gap:25px; padding:14px 28px; }
+    .brand { font:700 14px/1.4 ui-monospace,monospace; color:var(--ink); text-decoration:none; margin-right:auto; }
+    .nav a:not(.brand) { font-size:13px; color:var(--muted); white-space:nowrap; text-decoration:none; }
+    main { max-width:1180px; margin:auto; padding:0 28px 65px; }
+    .hero { display:grid; grid-template-columns:1.25fr 1fr; gap:45px; align-items:center; padding:68px 0 55px; }
+    .eyebrow,.section-no { font:700 12px/1.5 ui-monospace,monospace; letter-spacing:2px; color:var(--green); }
+    h1 { font-size:clamp(34px,4.2vw,55px); letter-spacing:-1.8px; line-height:1.25; margin:17px 0 22px; }
+    h1 span { display:block; font:500 clamp(16px,2.1vw,24px)/1.8 ui-monospace,monospace; letter-spacing:-.5px; margin-bottom:8px; color:var(--green); }
+    h2 { font-size:29px; line-height:1.4; letter-spacing:-.6px; margin:8px 0 12px; }
+    h3 { font-size:18px; margin:0 0 12px; }
+    p { margin:0 0 16px; }
+    .lead { color:var(--muted); font-size:17px; max-width:590px; }
+    .meta { color:var(--muted); font-size:12px; margin-top:24px; }
+    .hero-art { border:1px solid var(--line); border-radius:16px; padding:20px; background:#eaf0e9; }
+    svg { display:block; width:100%; height:auto; }
+    svg text { font-family:system-ui,"Microsoft YaHei",sans-serif; }
+    .caption { font-size:12px; color:var(--muted); margin-top:10px; }
+    .section { border-top:1px solid var(--line); padding:42px 0 10px; margin-bottom:32px; }
+    .intro { max-width:850px; color:var(--muted); }
+    .concepts { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:24px 0; }
+    .concept { background:white; padding:20px; border:1px solid var(--line); border-radius:10px; }
+    .concept b { display:block; font-size:18px; margin-bottom:8px; }
+    .concept p { font-size:14px; margin:0; color:var(--muted); }
+    .note { border-left:3px solid var(--green); padding:14px 20px; background:var(--soft); font-size:14px; margin:22px 0; }
+    .note.warn { border-color:var(--orange); background:#f8eee3; }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:25px; margin-top:22px; }
+    pre { margin:0; overflow:auto; background:#193238; color:#e0eeea; padding:22px; border-radius:10px; font:13px/1.85 ui-monospace,SFMono-Regular,Consolas,monospace; tab-size:2; }
+    code { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.9em; overflow-wrap:anywhere; }
+    pre code { font-size:inherit; overflow-wrap:normal; }
+    .lab { background:white; border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:25px; }
+    .lab-top { display:flex; gap:15px; flex-wrap:wrap; align-items:center; padding:16px 22px; background:#edf2ed; border-bottom:1px solid var(--line); }
+    .lab-top b { margin-right:auto; }
+    .lab-body { display:grid; grid-template-columns:270px minmax(0,1fr); }
+    .controls { padding:24px; border-right:1px solid var(--line); }
+    label.control { display:block; margin-bottom:20px; font-size:13px; font-weight:600; }
+    label.control output { float:right; color:var(--green); font-family:ui-monospace,monospace; }
+    input[type="range"] { width:100%; accent-color:var(--green); display:block; margin-top:10px; }
+    input[type="number"],select { width:100%; border:1px solid #a9bab8; border-radius:6px; padding:7px 10px; margin-top:7px; background:white; color:var(--ink); }
+    .small { font-size:12px; color:var(--muted); }
+    .viz { padding:22px; min-width:0; }
+    .stepper { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:20px; }
+    .stepper button { padding:5px 11px; font-size:12px; }
+    .plot { background:#f8faf8; border-radius:10px; border:1px solid #e6ece7; }
+    .legend { display:flex; flex-wrap:wrap; gap:18px; font-size:12px; margin:12px 0; }
+    .swatch { display:inline-block; width:11px; height:11px; margin-right:6px; vertical-align:middle; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; }
+    .stat { background:var(--paper); padding:12px 14px; border-radius:8px; }
+    .stat span { display:block; font-size:11px; color:var(--muted); }
+    .stat strong { display:block; font:600 20px/1.8 ui-monospace,monospace; }
+    #step-description { min-height:58px; font-size:14px; }
+    .calc { margin-top:18px; font:12px/1.9 ui-monospace,monospace; color:var(--muted); white-space:pre-wrap; overflow-wrap:anywhere; }
+    .trace { display:grid; grid-template-columns:260px minmax(0,1fr); gap:20px; margin:24px 0; }
+    .trace-nav { display:flex; flex-direction:column; gap:9px; }
+    .trace-nav button { text-align:left; }
+    .trace-panel { border:1px solid var(--line); padding:24px; background:white; border-radius:10px; min-width:0; }
+    .trace-panel pre { margin-top:18px; }
+    .table-wrap { overflow:auto; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th,td { text-align:left; vertical-align:top; padding:13px 15px; border-bottom:1px solid var(--line); }
+    th { background:#eaf0e9; }
+    details { padding:17px 20px; border:1px solid var(--line); background:white; border-radius:9px; margin:12px 0; }
+    summary { cursor:pointer; font-weight:600; }
+    details p { margin:14px 0 0; font-size:14px; }
+    .polygon-controls { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:18px; }
+    .polygon-controls label { flex:1; min-width:180px; font-size:13px; }
+    #polygon-reading { min-height:85px; }
+    footer { border-top:1px solid var(--line); padding-top:28px; color:var(--muted); font-size:13px; }
+    .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+    @media(max-width:850px) { .hero { gap:25px; } .nav { gap:13px; } .concepts { grid-template-columns:repeat(2,1fr); } .lab-body { grid-template-columns:230px minmax(0,1fr); } .stats { gap:6px; } .stat { padding:10px; } .stat strong { font-size:16px; } }
+    @media(max-width:650px) { .nav { padding:12px 18px; flex-wrap:wrap; gap:8px 18px; } .brand { flex-basis:100%; } main { padding:0 18px 40px; } .hero,.split,.trace,.lab-body { grid-template-columns:1fr; } .hero { padding:35px 0; } .hero-art { max-width:440px; } .concept { padding:15px; } .controls { border-right:0; border-bottom:1px solid var(--line); } .controls label.control { margin-bottom:14px; } h2 { font-size:25px; } .viz { padding:15px; } .stats { grid-template-columns:1fr; } .stat { display:flex; justify-content:space-between; align-items:center; } .trace-nav { flex-direction:row; flex-wrap:wrap; } .trace-nav button { font-size:12px; } }
+    @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+    @media print { body { background:white; font-size:12px; } header,.controls,.stepper,.polygon-controls { display:none; } main { max-width:none; padding:0; } .hero { padding-top:0; } .lab-body { display:block; } .section { break-inside:avoid; } pre { white-space:pre-wrap; color:black; background:#eee; } a { color:inherit; } }
+  </style>
+</head>
+<body>
+<header><nav class="nav" aria-label="章节导航">
+  <a class="brand" href="#top">OpenROAD / IFP · 源码学习</a>
+  <a href="#basics">01 基础</a><a href="#lab">02 动手算</a><a href="#source">03 源码</a><a href="#advanced">04 进阶</a><a href="#polygon">05 多边形</a>
+</nav></header>
+<main id="top">
+  <section class="hero" aria-labelledby="title">
+    <div>
+      <div class="eyebrow">从简单到复杂 · 交互式中文源码笔记</div>
+      <h1 id="title"><span>initialize_floorplan</span>从一条芯片边界，<br>到一排排放置行。</h1>
+      <p class="lead">先看见它做了什么，再亲手调整参数，最后沿着 Tcl → SWIG → C++ → OpenDB 走一遍源码。</p>
+      <a href="#lab">进入参数实验室 ↓</a>　<a href="initialize_floorplan-command-source-analysis.md">阅读完整源码笔记 ↗</a>
+      <div class="meta">源码基准 a55db75eb1 · 独立 HTML · 离线可用 · 无第三方依赖</div>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 440 300" role="img" aria-labelledby="hero-title hero-desc">
+        <title id="hero-title">Die、Core、Row 与 Site 的嵌套关系</title>
+        <desc id="hero-desc">外层深色矩形是 die，内部绿色虚线框是 core，交替颜色的横排是 rows，小格是 site。</desc>
+        <defs><pattern id="hero-grid" width="18" height="30" patternUnits="userSpaceOnUse"><path d="M0 0V30" stroke="#fff" stroke-width="1.5"/></pattern></defs>
+        <rect x="25" y="20" width="390" height="255" rx="3" fill="#fff" stroke="#203a40" stroke-width="2"/>
+        <text x="40" y="44" font-size="13" fill="#203a40">DIE · 芯片边界</text>
+        <rect x="61" y="62" width="318" height="181" fill="#e7f2ee" stroke="#087f75" stroke-dasharray="5 4"/>
+        <g fill="#087f75"><rect x="79" y="80" width="270" height="29"/><rect x="79" y="140" width="270" height="29"/><rect x="79" y="200" width="270" height="29"/></g>
+        <g fill="#657dba"><rect x="79" y="110" width="270" height="29"/><rect x="79" y="170" width="270" height="29"/></g>
+        <rect x="79" y="80" width="270" height="149" fill="url(#hero-grid)"/>
+        <text x="355" y="99" font-size="11" fill="#087f75">N</text><text x="352" y="129" font-size="11" fill="#4763b6">FS</text>
+        <text x="80" y="261" font-size="12" fill="#087f75">CORE 内生成 ROW；每个小格是 SITE</text>
+      </svg>
+      <div class="caption">概念示意，未按实际 site 宽高比例绘制。行建立后，单元位置仍由后续 placement 决定。</div>
+    </div>
+  </section>
+
+  <section class="section" id="basics">
+    <div class="section-no">01 / 先建立直觉</div>
+    <h2>它准备放置场地，然后才能放单元</h2>
+    <p class="intro">网表描述连接，LEF 提供物理尺寸。这个命令根据它们设置 die，并在 core 内建立 rows。一个单元通常横跨多个 site。</p>
+    <div class="concepts">
+      <div class="concept"><b>Die / 芯片边界</b><p>整个芯片的轮廓。矩形坐标写成左下角与右上角。</p></div>
+      <div class="concept"><b>Core / 核心区域</b><p>请求生成 rows 的范围。实际行边界会受到取整影响。</p></div>
+      <div class="concept"><b>Site / 放置格子</b><p>由 LEF 定义宽高。Nangate45 示例为 0.19 × 1.4 µm。</p></div>
+      <div class="concept"><b>Row / 放置行</b><p>多个 site 横向重复。一行记录起点、方向、数量和步长。</p></div>
+    </div>
+    <div class="split">
+      <div>
+        <h3>最直观的方式：显式给坐标</h3>
+        <p>在 <code>src/ifp/test</code> 目录准备右侧输入。四个坐标的顺序是 <code>{llx lly urx ury}</code>，单位均为 µm。</p>
+        <p>这里的 die 为 1000 × 1000 µm，core 为 800 × 800 µm。Tcl 中要用花括号把坐标组成一个参数。</p>
+        <p class="small">来源：<a href="../test/init_floorplan1.tcl">init_floorplan1.tcl</a>。site 名必须与已加载的 LEF 一致。</p>
+      </div>
+      <pre><code>read_lef Nangate45/Nangate45.lef
+read_liberty Nangate45/Nangate45_typ.lib
+read_verilog reg1.v
+link_design top
+
+initialize_floorplan \
+  -die_area {0 0 1000 1000} \
+  -core_area {100 100 900 900} \
+  -site FreePDK45_38x28_10R_NP_162NW_34O
+
+make_tracks</code></pre>
+    </div>
+    <div class="note">初始化会清除旧 tracks，并删除、重建旧 rows。需要布线轨道时，在它之后执行 <code>make_tracks</code>。这个阶段尚未完成单元布局、引脚安排或电源网格生成。</div>
+  </section>
+
+  <section class="section" id="lab">
+    <div class="section-no">02 / 动手调整参数</div>
+    <h2>30% 的目标，为什么得到约 37.2%？</h2>
+    <p class="intro">默认值来自 <a href="../test/init_floorplan2.tcl">init_floorplan2</a>：5 个实例、总面积 15.428 µm²。先按利用率估算尺寸，再通过制造网格和 site 网格取整。点击阶段按钮，看目标面积如何变成真实的放置行。</p>
+    <div class="lab">
+      <div class="lab-top"><b>利用率 → 尺寸 → Rows</b><span class="small">Nangate45 · 2000 DBU/µm · 制造网格 0.005 µm</span><button id="reset" type="button">恢复仓库算例</button></div>
+      <div class="lab-body">
+        <form class="controls" id="parameters">
+          <label class="control" for="area">实例总面积 A / µm²<input id="area" type="number" min="1" max="1000" step="0.001" value="15.428" required></label>
+          <label class="control" for="util">目标利用率 U <output id="util-value" for="util">30%</output><input id="util" type="range" min="5" max="100" step="1" value="30"></label>
+          <label class="control" for="ratio">高宽比 H / W <output id="ratio-value" for="ratio">0.5</output><input id="ratio" type="range" min="0.2" max="2" step="0.1" value="0.5"></label>
+          <label class="control" for="margin">四边留白 / µm <output id="margin-value" for="margin">1.0</output><input id="margin" type="range" min="0" max="5" step="0.1" value="1"></label>
+          <label class="control" for="parity">行数奇偶约束<select id="parity"><option>NONE</option><option>EVEN</option><option>ODD</option></select></label>
+          <label class="small"><input type="checkbox" id="flip"> 翻转此 site 的 N / FS 序列</label>
+          <p class="small" style="margin-top:18px">实验范围限定为单一普通 site、非负坐标、无电压域和障碍物。实例面积可调，但未模拟实例形状检查。</p>
+        </form>
+        <div class="viz">
+          <div class="stepper" aria-label="建行步骤">
+            <button type="button" data-step="0" aria-pressed="false">① 估算</button><button type="button" data-step="1" aria-pressed="false">② 建 Die</button><button type="button" data-step="2" aria-pressed="false">③ 内缩 Core</button><button type="button" data-step="3" aria-pressed="false">④ 对齐</button><button type="button" data-step="4" aria-pressed="true">⑤ 建 Rows</button>
+          </div>
+          <p id="step-description" aria-live="polite"></p>
+          <svg id="floorplan" class="plot" viewBox="0 0 680 380" role="img" aria-labelledby="floorplan-title floorplan-desc"><title id="floorplan-title">利用率模式生成 floorplan</title><desc id="floorplan-desc"></desc><g id="floorplan-drawing"></g></svg>
+          <div class="legend"><span><i class="swatch" style="background:#203a40"></i>Die 边界</span><span><i class="swatch" style="background:#bfddd3"></i>请求 Core</span><span><i class="swatch" style="background:#087f75"></i>N 行</span><span><i class="swatch" style="background:#657dba"></i>FS 行</span></div>
+          <div class="stats" aria-live="polite"><div class="stat"><span>最终行数 × 每行 sites</span><strong id="rows-stat"></strong></div><div class="stat"><span>Rows 外包框 / µm²</span><strong id="area-stat"></strong></div><div class="stat"><span>有效利用率 / 百分数</span><strong id="effective-stat"></strong></div></div>
+          <div id="calculation" class="calc"></div>
+          <p id="lab-warning" class="small" role="status"></p>
+        </div>
+      </div>
+    </div>
+    <div class="split">
+      <div><h3>这一组参数对应的 Tcl</h3><p class="small">先运行第 1 节的读库、读网表与 link_design。修改面积输入只改变教学模型；真实命令从网表实例的物理尺寸统计面积。</p><pre><code id="generated-command"></code></pre></div>
+      <div><h3>把输出和 DEF 对起来</h3><p>默认算例得到 <b>3 行 × 52 个 site</b>。它们占用的外包框面积为 <b>41.496 µm²</b>，小于连续目标的 51.427 µm²。</p><pre><code id="generated-def"></code></pre><p class="caption">动态显示前 3 条 ROW。坐标与 STEP 均为 DBU。图中的密集格线会抽样，数值不抽样。</p></div>
+    </div>
+    <div class="note"><code>aspect_ratio = 高 / 宽</code>。比例大于 1 表示高而窄，当前 C++ 允许它。利用率输入为百分数，而源码日志中的 <code>0.372</code> 是比值，换算后约为 <code>37.2%</code>。</div>
+  </section>
+
+  <section class="section" id="source">
+    <div class="section-no">03 / 把画面接到源码</div>
+    <h2>沿着实际调用者，一层层向下读</h2>
+    <p class="intro">当前 Tcl 入口分别调用建 die 和建 rows 的 helper。虽然 C++ 有同名 <code>initFloorplan()</code> 重载，这条 Tcl 路径没有直接调用它。</p>
+    <div class="trace">
+      <div class="trace-nav" aria-label="源码层级">
+        <button type="button" data-trace="0" aria-pressed="true">01　Tcl：选择路径</button><button type="button" data-trace="1" aria-pressed="false">02　SWIG：传递参数</button><button type="button" data-trace="2" aria-pressed="false">03　C++：估算并写 Die</button><button type="button" data-trace="3" aria-pressed="false">04　C++：生成 Rows</button><button type="button" data-trace="4" aria-pressed="false">05　OpenDB：保存与统计</button>
+      </div>
+      <div class="trace-panel" aria-live="polite"><h3 id="trace-title"></h3><p id="trace-text"></p><a id="trace-link" href="../src/InitFloorplan.tcl">打开对应源码 ↗</a><pre><code id="trace-code"></code></pre></div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>要回答的问题</th><th>优先查找的函数</th><th>读源码时的关键点</th></tr></thead><tbody>
+      <tr><td>面积从哪里来？</td><td><code>designArea()</code></td><td>累加所有 block 实例的 master 宽 × 高；不是 Liberty area。</td></tr>
+      <tr><td>尺寸为何有偏差？</td><td><code>makeDieUtilization()</code><br><code>snapToMfgGrid()</code></td><td>宽截断、高四舍五入；die 各坐标就近对齐制造网格。</td></tr>
+      <tr><td>行从哪里开始？</td><td><code>makeRows()</code></td><td>core 左下角向上对齐基础 site 网格，原点基准为 0。</td></tr>
+      <tr><td>旧 rows 去哪里了？</td><td><code>prepareSitesAndClearRows()</code></td><td>收集 sites 后销毁旧 rows，再建立新行。</td></tr>
+      <tr><td>为什么还要 make_tracks？</td><td><code>makeDie() → resetTracks()</code></td><td>初始化清除旧轨道；新轨道由独立命令生成。</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="section" id="advanced">
+    <div class="section-no">04 / 从一类行到复杂场地</div>
+    <h2>附加参数会改变哪些行为？</h2>
+    <div class="table-wrap"><table><thead><tr><th>选项</th><th>用途</th><th>需要注意</th></tr></thead><tbody>
+      <tr><td><code>-core_space</code></td><td>单值用于四边；四值为下、上、左、右。</td><td>利用率模式显式提供。可为 0；不能与显式 die 混用。</td></tr>
+      <tr><td><code>-row_parity</code></td><td>普通行的生成数量约束为 NONE / EVEN / ODD。</td><td>只减不加；分割后的 row 对象总数未必保持奇偶性。</td></tr>
+      <tr><td><code>-flip_sites</code></td><td>指定普通 site 以 FS 开头，交替 FS / N。</td><td>FS 是 MX，关于 x 轴镜像；它不会生成电源网格。</td></tr>
+      <tr><td><code>-additional_sites</code></td><td>提前为其他 site 准备 rows。</td><td>普通路径要求高度是基础 site 高度整数倍；x 步长用基础 site 宽度。</td></tr>
+      <tr><td><code>-gap</code></td><td>已定义电压域周围的留白。</td><td>不是相邻普通行间距。默认 6 倍最小 site 高度；显式值转 DBU 后须为正。</td></tr>
+    </tbody></table></div>
+    <details><summary>多高度 rows 与 hybrid rows 有什么区别？</summary><p>多高度流程为各 site 生成对应高度的候选 rows；hybrid 流程由基础 site 的 ROWPATTERN 指定子 site 与方向，使用模式匹配决定偏移。矩形 hybrid 路径不支持非 NONE 的 row_parity，且不使用普通行的 flipped_sites 参数。多边形路径暂不支持 hybrid rows。</p></details>
+    <details><summary>“Core area” 就是最终可用放置面积吗？</summary><p>普通单 site、无裁行的矩形算例可以这样计算。通用情况下，reportAreas() 使用 getCoreArea() 的外包矩形面积；生成器记录 core 的时点又早于电压域与障碍物裁行。对有缺口、孔洞或行分割的场景，日志面积不等于最终可用 site 面积总和。</p></details>
+    <details><summary>参数写错后，原 floorplan 会自动恢复吗？</summary><p>不能这样假定。Tcl 先建 die，再解析和生成 rows；部分错误可能发生在 die 已改变、tracks 已删除之后。普通 rows 的某些后续检查也发生在旧 rows 被删除后。试验不同参数时，可重新读取设计或启动独立进程。</p></details>
+    <details><summary>源码校验与推荐输入范围有哪些差异？</summary><p>推荐 0 &lt; utilization ≤ 100，aspect_ratio &gt; 0。当前 C++ 对 utilization 只显式检查非负，缺少完整的零值和上限保护；教学计算器限制有效输入。不要把校验遗漏理解为支持异常参数。帮助里的 -site 虽带方括号，建行 helper 实际仍要求它。</p></details>
+  </section>
+
+  <section class="section" id="polygon">
+    <div class="section-no">05 / 多边形与扫描线</div>
+    <h2>同一个高度，可以生成多个 row 片段</h2>
+    <p class="intro">die 或 core 任一列表超过 4 个坐标就进入多边形分支。两者都需要提供至少 4 个顶点；坐标数要为偶数。轮廓应为简单正交多边形，core 应位于 die 内。</p>
+    <div class="split">
+      <div class="lab" style="margin-top:0;padding:20px">
+        <div class="polygon-controls"><button type="button" data-shape="L" aria-pressed="true">L 形</button><button type="button" data-shape="U" aria-pressed="false">U 形</button><label for="scan">扫描线 y = <output id="scan-value" for="scan">50</output><input id="scan" type="range" min="10" max="150" step="10" value="50"></label></div>
+        <svg id="polygon-svg" class="plot" viewBox="0 0 440 330" role="img" aria-labelledby="polygon-title polygon-desc"><title id="polygon-title">正交多边形与扫描线交点</title><desc id="polygon-desc"></desc><g id="polygon-drawing"></g></svg>
+        <p class="caption">简化坐标模型：core 轮廓，site 为 10 × 10；拐点对齐行高。此图不使用 Nangate45 尺寸，不模拟 die 系统障碍物或 UPF。</p>
+      </div>
+      <div>
+        <h3>交点排序 → 两两配对 → 对齐格子</h3>
+        <p id="polygon-reading" aria-live="polite"></p>
+        <pre><code># 已加载库、网表，并 link_design
+initialize_floorplan \
+  -die_area {0 0 200 0 200 100
+             100 100 100 200 0 200} \
+  -core_area {20 20 180 20 180 80
+              80 80 80 180 20 180} \
+  -site FreePDK45_38x28_10R_NP_162NW_34O</code></pre>
+        <p class="caption">可在仓库测试数据环境运行的 L 形例子；左侧演示用独立的简化尺寸。源码：<a href="../src/InitFloorplan.cc">makeUniformRowsPolygon / intersectRowWithPolygon</a>。</p>
+      </div>
+    </div>
+    <div class="note warn">当前 <code>intersectRowWithPolygon()</code> 用的是 row <b>底边 y</b>，并未对整行高度做严格多边形相交；拐点落在一行中间时，不能只凭这次求交断言整行都在 core 内。另一个边界是：显式包含检查使用 die/core 的外包框，并非完整多边形包含检查。</div>
+    <p>OpenDB 还会将“die 外包框减去 die 多边形”的空白区转换为系统障碍物，供后续裁行使用。core 缺口和 die 外部空白区是两回事，不能认为这一步自动完成了所有 core 几何校验。</p>
+  </section>
+
+  <section class="section" id="reading">
+    <div class="section-no">06 / 回到仓库验证</div>
+    <h2>用一个小测试，把公式和结果对上</h2>
+    <p>仓库 golden 文件记录了默认算例的 3 行、52 个 sites、41.496 µm² 和 0.372。可在已构建 OpenROAD 的仓库中运行：</p>
+    <pre><code># 从仓库根目录开始
+cd src/ifp/test
+RESULTS_DIR=/tmp/ifp-note-results \
+  ../../../build/bin/openroad -no_init -no_splash -exit init_floorplan2.tcl</code></pre>
+    <p class="caption">页面计算是对单 site 公式的演示，不会启动 OpenROAD。可执行文件版本不同，输出格式和行为也可能不同。</p>
+    <p><a href="../test/init_floorplan2.ok">查看预期日志</a> · <a href="../test/init_floorplan2.defok">查看预期 DEF</a> · <a href="../test/make_polygon_rows1.tcl">多边形测试</a> · <a href="initialize_floorplan-command-source-analysis.md">完整中文源码笔记</a></p>
+  </section>
+  <footer>基于当前仓库源码编写。阅读顺序：<a href="../src/InitFloorplan.tcl">Tcl 入口</a> → <a href="../src/InitFloorplan.i">SWIG 桥接</a> → <a href="../src/InitFloorplan.cc">C++ 实现</a> → <a href="../../odb/src/db/dbBlock.cpp">OpenDB 存储</a>。<br>延伸阅读：<a href="make_rows-command-source-analysis.md">make_rows</a> · <a href="make_tracks-command-source-analysis.md">make_tracks</a>。</footer>
+</main>
+<noscript><p class="note">交互演示需要启用 JavaScript。静态章节仍可阅读，完整推导请打开同目录下的中文 Markdown 笔记。</p></noscript>
+<script>
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const siteName = 'FreePDK45_38x28_10R_NP_162NW_34O';
+  const dbu = 2000, sx = 380, sy = 2800, grid = 10;
+  let stage = 4, shape = 'L';
+  const fixed = (v, n = 3) => Number(v).toFixed(n);
+  function svgEl(parent, tag, attrs, text) {
+    const el = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+    if (text !== undefined) el.textContent = text;
+    parent.appendChild(el);
+    return el;
+  }
+  function calculate() {
+    const area = Number($('area').value), util = Number($('util').value), ratio = Number($('ratio').value);
+    const margin = Math.round(Number($('margin').value) * dbu);
+    const target = area / (util / 100);
+    const width = Math.floor(Math.sqrt(target * dbu * dbu / ratio));
+    const height = Math.round(width * ratio);
+    const dx = Math.round((width + 2 * margin) / grid) * grid;
+    const dy = Math.round((height + 2 * margin) / grid) * grid;
+    const lx = Math.ceil(margin / sx) * sx, ly = Math.ceil(margin / sy) * sy;
+    const ux = dx - margin, uy = dy - margin;
+    const cols = Math.max(0, Math.floor((ux - lx) / sx));
+    const rawRows = Math.max(0, Math.floor((uy - ly) / sy));
+    let rows = rawRows;
+    if ($('parity').value === 'EVEN') rows = Math.floor(rows / 2) * 2;
+    if ($('parity').value === 'ODD' && rows > 0 && rows % 2 === 0) rows--;
+    const rowArea = cols * sx * rows * sy / (dbu * dbu);
+    return {area, util, ratio, margin, target, width, height, dx, dy, lx, ly, ux, uy, cols, rawRows, rows, rowArea};
+  }
+  function renderFloorplan(m) {
+    const g = $('floorplan-drawing');
+    g.replaceChildren();
+    const scale = Math.min(550 / m.dx, 275 / m.dy);
+    const ox = (680 - m.dx * scale) / 2, oy = (380 - m.dy * scale) / 2 + 4;
+    const X = x => ox + x * scale, Y = y => oy + (m.dy - y) * scale;
+    const rect = (x, y, w, h, attrs) => svgEl(g, 'rect', {x:X(x), y:Y(y+h), width:Math.max(0,w*scale), height:Math.max(0,h*scale), ...attrs});
+    if (stage === 0) {
+      const idealW = Math.sqrt(m.target / m.ratio) * dbu, idealH = idealW * m.ratio;
+      rect(m.margin, m.margin, idealW, idealH, {fill:'#e1eee8',stroke:'#087f75','stroke-width':2,'stroke-dasharray':'6 5'});
+      svgEl(g,'text',{x:340,y:24,'text-anchor':'middle',fill:'#087f75','font-size':14},`连续目标 Core：${fixed(m.target)} µm²`);
+    } else {
+      rect(0,0,m.dx,m.dy,{fill:'#fff',stroke:'#203a40','stroke-width':2});
+      if (stage >= 2) rect(m.margin,m.margin,m.ux-m.margin,m.uy-m.margin,{fill:'#e1eee8',stroke:'#087f75','stroke-width':1.5,'stroke-dasharray':'6 4'});
+      if (stage === 3) {
+        svgEl(g,'line',{x1:X(m.margin),y1:Y(m.margin),x2:X(m.lx),y2:Y(m.ly),stroke:'#b26325','stroke-width':3});
+        svgEl(g,'circle',{cx:X(m.lx),cy:Y(m.ly),r:5,fill:'#b26325'});
+        svgEl(g,'text',{x:340,y:24,'text-anchor':'middle',fill:'#b26325','font-size':13},`行起点 → (${fixed(m.lx/dbu)}, ${fixed(m.ly/dbu)}) µm`);
+      }
+      if (stage === 4 && m.rows > 0 && m.cols > 0) {
+        const flip = Number($('flip').checked);
+        for (let row = 0; row < m.rows; row++) {
+          const color = (row + flip) % 2 === 0 ? '#087f75' : '#657dba';
+          rect(m.lx,m.ly+row*sy,m.cols*sx,sy,{fill:color,stroke:'#fff','stroke-width':.6});
+          const stride = Math.max(1,Math.ceil(m.cols/100));
+          for (let c = stride; c < m.cols; c += stride) svgEl(g,'line',{x1:X(m.lx+c*sx),x2:X(m.lx+c*sx),y1:Y(m.ly+row*sy),y2:Y(m.ly+(row+1)*sy),stroke:'#ffffff75','stroke-width':.6});
+          if (m.rows <= 14) svgEl(g,'text',{x:X(m.lx+m.cols*sx)+7,y:Y(m.ly+(row+.4)*sy),'font-size':11,fill:color},(row+flip)%2===0?'N':'FS');
+        }
+      }
+      svgEl(g,'text',{x:340,y:362,'text-anchor':'middle',fill:'#203a40','font-size':13},`Die ${fixed(m.dx/dbu)} × ${fixed(m.dy/dbu)} µm`);
+    }
+    svgEl(g,'text',{x:18,y:355,fill:'#53686c','font-size':11},'y ↑');
+    svgEl(g,'text',{x:18,y:372,fill:'#53686c','font-size':11},'x →');
+    $('floorplan-desc').textContent = `阶段 ${stage+1}。Die 宽 ${fixed(m.dx/dbu)}、高 ${fixed(m.dy/dbu)} 微米。最终 ${m.rows} 行，每行 ${m.cols} 个 site。`;
+  }
+  function update() {
+    if (!$('area').validity.valid) {
+      $('lab-warning').textContent = '请输入 1 到 1000 µm² 的实例面积；当前画面保留上一次有效结果。';
+      return;
+    }
+    const m = calculate();
+    $('util-value').textContent = `${m.util}%`;
+    $('ratio-value').textContent = fixed(m.ratio,1);
+    $('margin-value').textContent = fixed(m.margin/dbu,1);
+    const descriptions = [
+      `先用 A / (U / 100) 得到目标面积 ${fixed(m.target)} µm²，再用高宽比 ${fixed(m.ratio,1)} 求宽高。图中尚未设置 Die。`,
+      `宽度截断为 ${m.width} DBU，高度四舍五入为 ${m.height} DBU；加四边留白后，Die 坐标就近对齐到 10 DBU 制造网格。`,
+      `从已保存的 Die 四边内缩 ${fixed(m.margin/dbu,1)} µm，得到请求 Core；绿色虚线仍未对齐 site。`,
+      `Core 左下角从 (${fixed(m.margin/dbu)}, ${fixed(m.margin/dbu)}) 向上对齐到 (${fixed(m.lx/dbu)}, ${fixed(m.ly/dbu)}) µm。`,
+      `按完整 site 宽度、完整行高取整：${m.rawRows} 个候选行经 ${$('parity').value} 约束后为 ${m.rows} 行，每行 ${m.cols} 个 site。N / FS 方向交替。`
+    ];
+    $('step-description').textContent = descriptions[stage];
+    $('rows-stat').textContent = `${m.rows} × ${m.cols}`;
+    $('area-stat').textContent = fixed(m.rowArea);
+    $('effective-stat').textContent = m.rowArea > 0 ? `${fixed(m.area/m.rowArea*100,2)}%` : '无可用行';
+    $('calculation').textContent = `目标面积 = ${fixed(m.area)} / ${fixed(m.util/100,2)} = ${fixed(m.target)} µm²\n请求 Core = (${m.margin}, ${m.margin}) → (${m.ux}, ${m.uy}) DBU\n行起点 = (${m.lx}, ${m.ly}) DBU；site = ${sx} × ${sy} DBU\n日志比值 = ${m.rowArea > 0 ? fixed(m.area/m.rowArea) : '不可计算'}（此处不是百分数）`;
+    $('lab-warning').textContent = m.rowArea <= 0 ? '当前参数无法提供完整放置行；真实普通行流程可能报告 IFP-0061 / IFP-0065。' : m.area > m.rowArea ? '取整后实例面积超过行外包框面积；这个参数组合不能保证可放置。' : '';
+    const slash = ' \\' + '\n';
+    let cmd = 'initialize_floorplan' + slash + `  -utilization ${m.util}` + slash + `  -aspect_ratio ${fixed(m.ratio,1)}` + slash + `  -core_space ${fixed(m.margin/dbu,1)}` + slash + `  -site ${siteName}`;
+    if ($('parity').value !== 'NONE') cmd += slash + `  -row_parity ${$('parity').value}`;
+    if ($('flip').checked) cmd += slash + `  -flip_sites {${siteName}}`;
+    $('generated-command').textContent = cmd;
+    let def = `DIEAREA ( 0 0 ) ( ${m.dx} ${m.dy} ) ;`;
+    for (let i=0;i<Math.min(m.rows,3);i++) def += `\nROW ROW_${i} ${siteName}\n  ${m.lx} ${m.ly+i*sy} ${(i+Number($('flip').checked))%2===0?'N':'FS'} DO ${m.cols} BY 1 STEP ${sx} 0 ;`;
+    if (m.rows > 3) def += `\n# 其余 ${m.rows-3} 行省略`;
+    $('generated-def').textContent = def;
+    document.querySelectorAll('[data-step]').forEach(b=>b.setAttribute('aria-pressed', String(Number(b.dataset.step)===stage)));
+    renderFloorplan(m);
+  }
+  $('parameters').addEventListener('submit', event=>event.preventDefault());
+  $('parameters').addEventListener('input', update);
+  $('parameters').addEventListener('change', update);
+  $('reset').addEventListener('click',()=>{ $('parameters').reset(); stage=4; update(); });
+  document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{stage=Number(b.dataset.step);update();}));
+  const traces = [
+    {title:'Tcl：先分支，再分两步建场地',text:'解析参数后，die 或 core 的坐标列表超过 4 个数就进入多边形路径；普通路径先创建 die，再解析并创建 rows。验证不是一次性在所有修改之前完成。',link:'../src/InitFloorplan.tcl',code:'initialize_floorplan\n  → ifp::make_die_helper\n      → ifp::make_die_util / ifp::make_die\n  → make_rows_helper\n      → ifp::make_rows_with_spacing / ifp::make_rows'},
+    {title:'SWIG：把脚本参数交给当前设计',text:'helper 将微米转换为 DBU。SWIG 将枚举、site 列表、多边形点列表转换成 C++ 类型，再调用 design->getFloorplan()。Design 指针由 src/Design.i 的零输入 typemap 提供，Tcl 无须手动传入。',link:'../src/InitFloorplan.i',code:'ifp::make_die_util\n  → design->getFloorplan().makeDieUtilization(...)\n\nifp::make_rows_with_spacing\n  → design->getFloorplan().makeRowsWithSpacing(...)'},
+    {title:'C++：面积公式之后还有整数运算',text:'designArea() 使用所有实例 master 的物理宽高乘积。宽度先截断成 int，高度再用这个整数宽度计算并 round。makeDie() 将边界对齐到制造网格、保存 die，并销毁旧 tracks。',link:'../src/InitFloorplan.cc',code:'utilization /= 100;\ncore_area = designArea() / utilization;\ncore_width = int(sqrt(core_area / aspect_ratio));\ncore_height = round(core_width * aspect_ratio);\n// 加留白 → makeDie → snapToMfgGrid\nblock_->setDieArea(die_area);\nresetTracks();'},
+    {title:'C++：site 网格决定行起点和容量',text:'makeRowsWithSpacing() 从保存的 die 推导 core。makeRows() 检查范围、清旧行，评估 UPF 并对齐起点，然后选择普通或 hybrid 建行；末尾按电压域和障碍物调整 rows。',link:'../src/InitFloorplan.cc',code:'makeRows\n  → prepareSitesAndClearRows\n  → eval_upf + 对齐左下角\n  → makeUniformRows / makeHybridRows\n      → dbRow::create(...)\n  → updateVoltageDomain\n  → odb::cutRows\n  → reportAreas'},
+    {title:'OpenDB：存储的轮廓与打印的外包框',text:'dbBlock 保存 die polygon 和 rows；getDieArea() 返回 die 外包矩形。生成器通过 computeCoreArea() 和 setCoreArea() 记录 core，reportAreas() 打印 core 外包矩形面积，不保证等于复杂场景的最终可用 site 面积。',link:'../../odb/src/db/dbBlock.cpp',code:'dbBlock::setDieArea(Rect / Polygon)\ndbBlock::getDieAreaPolygon()   // 真实 die 轮廓\ndbBlock::getDieArea()          // die 外包框\ndbBlock::computeCoreArea()    // 根据非 PAD rows\ndbBlock::getCoreArea()        // core 外包框'}
+  ];
+  function showTrace(index) {
+    const t=traces[index];
+    $('trace-title').textContent=t.title; $('trace-text').textContent=t.text;
+    $('trace-link').href=t.link; $('trace-code').textContent=t.code;
+    document.querySelectorAll('[data-trace]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.trace)===index)));
+  }
+  document.querySelectorAll('[data-trace]').forEach(b=>b.addEventListener('click',()=>showTrace(Number(b.dataset.trace))));
+  const shapes = {L:[[0,0],[180,0],[180,80],[80,80],[80,160],[0,160]],U:[[0,0],[180,0],[180,160],[130,160],[130,60],[50,60],[50,160],[0,160]]};
+  function intersections(points,y) {
+    const xs=[];
+    points.forEach((p,i)=>{
+      const q=points[(i+1)%points.length];
+      if ((p[1]<=y && q[1]>y)||(q[1]<=y && p[1]>y)) xs.push(Math.round(p[0]+(q[0]-p[0])*(y-p[1])/(q[1]-p[1])));
+    });
+    return xs.sort((a,b)=>a-b);
+  }
+  function renderPolygon() {
+    const points=shapes[shape], y=Number($('scan').value), xs=intersections(points,y);
+    const g=$('polygon-drawing');g.replaceChildren();
+    const X=x=>60+x*1.7, Y=y=>292-y*1.7;
+    svgEl(g,'polygon',{points:points.map(p=>`${X(p[0])},${Y(p[1])}`).join(' '),fill:'#e7f2ee',stroke:'#087f75','stroke-width':2});
+    for(let ry=0;ry<160;ry+=10) {
+      const line=intersections(points,ry);
+      for(let i=0;i+1<line.length;i+=2) svgEl(g,'line',{x1:X(line[i]),x2:X(line[i+1]),y1:Y(ry+5),y2:Y(ry+5),stroke:'#c0d5cd','stroke-width':1});
+    }
+    svgEl(g,'line',{x1:25,x2:414,y1:Y(y),y2:Y(y),stroke:'#b26325','stroke-width':1.5,'stroke-dasharray':'5 3'});
+    const segments=[];
+    for(let i=0;i+1<xs.length;i+=2) {
+      svgEl(g,'rect',{x:X(xs[i]),y:Y(y+10),width:(xs[i+1]-xs[i])*1.7,height:17,fill:'#087f75',opacity:.8});
+      for(let x=xs[i]+10;x<xs[i+1];x+=10) svgEl(g,'line',{x1:X(x),x2:X(x),y1:Y(y),y2:Y(y+10),stroke:'white','stroke-width':.8});
+      segments.push(`[${xs[i]}, ${xs[i+1]}]：${(xs[i+1]-xs[i])/10} 个 site`);
+    }
+    xs.forEach(x=>{svgEl(g,'circle',{cx:X(x),cy:Y(y),r:4,fill:'#b26325'});svgEl(g,'text',{x:X(x),y:Y(y)+17,'text-anchor':'middle','font-size':11,fill:'#8d471d'},String(x));});
+    svgEl(g,'text',{x:22,y:22,'font-size':12,fill:'#53686c'},`${shape} 形 Core · y ↑`);
+    svgEl(g,'text',{x:60,y:315,'font-size':12,fill:'#53686c'},'0');
+    $('scan-value').textContent=String(y);
+    const reading=`y = ${y} 时，排序后的交点 x 为 ${xs.join('、')}。配对得到 ${segments.length} 个片段：${segments.join('；')}。同一层的片段共享 row_idx，因此具有相同方向。`;
+    $('polygon-reading').textContent=reading;$('polygon-desc').textContent=reading;
+    document.querySelectorAll('[data-shape]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.shape===shape)));
+  }
+  $('scan').addEventListener('input',renderPolygon);
+  document.querySelectorAll('[data-shape]').forEach(b=>b.addEventListener('click',()=>{shape=b.dataset.shape;renderPolygon();}));
+  update();showTrace(0);renderPolygon();
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="400" viewBox="0 0 1040 400" role="img" aria-labelledby="title desc">
+  <title id="title">PPL 将逻辑端口落实为物理引脚</title>
+  <desc id="desc">左侧展示输入端口、内部电路和输出端口之间的逻辑连接。右侧展示同一设计的物理边界：输入引脚位于左边，输出引脚位于右边，内部电路位置保持，底部红色区间禁止放置引脚。虚线仅表示连接关系。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#52637b"/>
+    </marker>
+    <pattern id="blocked" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#fff1f0"/>
+      <path d="M-2 2 L2-2 M0 8 L8 0 M6 10 L10 6" stroke="#df7770" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+  <rect width="1040" height="400" rx="16" fill="#f7f9fc"/>
+  <g font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif" fill="#20324d">
+    <text x="32" y="38" font-size="21" font-weight="700">从“连到哪里”到“引脚放在哪里”</text>
+    <rect x="24" y="60" width="404" height="306" rx="12" fill="#fff" stroke="#d9e1ec"/>
+    <text x="46" y="91" font-size="17" font-weight="700">网表：给出连接关系</text>
+    <text x="46" y="117" font-size="13" fill="#52637b">端口已有名称，物理位置尚待确定</text>
+    <path d="M139 213 H174 M280 213 H315" fill="none" stroke="#52637b" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+    <rect x="47" y="187" width="92" height="52" rx="9" fill="#e8f2ff" stroke="#3679bb"/>
+    <text x="93" y="219" text-anchor="middle" font-size="15" fill="#235c93">输入端口</text>
+    <rect x="177" y="173" width="103" height="80" rx="9" fill="#edf0f5" stroke="#94a3b8"/>
+    <text x="228" y="209" text-anchor="middle" font-size="15">内部电路</text>
+    <text x="228" y="231" text-anchor="middle" font-size="12" fill="#52637b">单元及其引脚</text>
+    <rect x="316" y="187" width="92" height="52" rx="9" fill="#fff2e2" stroke="#bb731e"/>
+    <text x="362" y="219" text-anchor="middle" font-size="15" fill="#925519">输出端口</text>
+    <text x="46" y="331" font-size="13" fill="#52637b">例如：data_in → 运算电路 → data_out</text>
+    <path d="M440 205 H495" fill="none" stroke="#52637b" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="469" y="188" text-anchor="middle" font-size="16" font-weight="700">PPL</text>
+    <rect x="510" y="60" width="506" height="306" rx="12" fill="#fff" stroke="#d9e1ec"/>
+    <text x="532" y="91" font-size="17" font-weight="700">物理设计：引脚具有位置、层和形状</text>
+    <text x="605" y="121" font-size="13" fill="#52637b">Die：芯片或设计块的边界</text>
+    <rect x="606" y="139" width="322" height="166" fill="#fafbfd" stroke="#52637b" stroke-width="2"/>
+    <g stroke="#a8b5c8" stroke-width="3">
+      <path d="M636 139 v10 M666 139 v10 M696 139 v10 M726 139 v10 M756 139 v10 M786 139 v10 M816 139 v10 M846 139 v10 M876 139 v10 M906 139 v10"/>
+      <path d="M636 305 v-10 M666 305 v-10 M696 305 v-10 M846 305 v-10 M876 305 v-10 M906 305 v-10"/>
+      <path d="M606 164 h10 M606 249 h10 M606 279 h10 M928 164 h-10 M928 194 h-10 M928 279 h-10"/>
+    </g>
+    <rect x="667" y="174" width="199" height="98" rx="8" fill="#edf0f5" stroke="#c4cedc"/>
+    <text x="766" y="210" text-anchor="middle" font-size="15">内部电路</text>
+    <text x="766" y="233" text-anchor="middle" font-size="12" fill="#52637b">PPL 保持单元位置</text>
+    <path d="M620 207 H667 M866 244 H911" fill="none" stroke="#52637b" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+    <rect x="606" y="201" width="16" height="12" fill="#3679bb"/>
+    <rect x="912" y="238" width="16" height="12" fill="#bb731e"/>
+    <text x="590" y="205" text-anchor="end" font-size="14" fill="#235c93">输入</text>
+    <text x="590" y="225" text-anchor="end" font-size="12" fill="#235c93">金属引脚</text>
+    <text x="944" y="242" font-size="14" fill="#925519">输出</text>
+    <text x="944" y="261" font-size="12" fill="#925519">金属引脚</text>
+    <rect x="716" y="294" width="102" height="22" fill="url(#blocked)" stroke="#c05650"/>
+    <text x="766" y="340" text-anchor="middle" font-size="13" fill="#99443f">禁放区：跳过受影响的位置</text>
+    <text x="32" y="389" font-size="12" fill="#52637b">概念示意 · 灰色短线是候选位置 · 虚线表示连接关系，实际布线在后续步骤完成</text>
+  </g>
+</svg>
