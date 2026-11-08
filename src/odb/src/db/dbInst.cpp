@@ -1392,7 +1392,7 @@ dbInst* dbInst::create(dbBlock* block_,
   }
 
   _dbBox* box = block->box_tbl_->create();
-  box->shape_.rect.init(0, 0, master->width_, master->height_);
+  master_->getPlacementBoundary(box->shape_.rect);
   box->flags_.owner_type = dbBoxOwner::INST;
   box->owner_ = inst_impl->getOID();
   inst_impl->bbox_ = box->getOID();
