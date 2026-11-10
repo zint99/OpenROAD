@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="OpenROAD GPL 对 ODB 迭代顺序的敏感性：管理层汇报，含结论、交互反例、证据边界及验证建议。">
+  <title>GPL × ODB｜迭代顺序与 QoR</title>
+  <style>
+    :root {
+      --paper: #f5f2e9; --ink: #202c2b; --muted: #64706a; --line: #d6d9ce;
+      --accent: #be482e; --soft: #ece6d8; --green: #3e6759; --green-soft: #e3eae1;
+      --body: 1.39cqw; --small: 1.04cqw; --title: 3.7cqw; --space: 3.8cqw;
+    }
+    * { box-sizing: border-box; }
+    html { height: 100%; }
+    body { margin: 0; min-height: 100%; color: var(--ink); background: #e6e7df;
+      font-family: "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", "Droid Sans Fallback", sans-serif; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; cursor: pointer; }
+    button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
+    button:disabled { cursor: default; opacity: .3; }
+    a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+    button { color: inherit; }
+    [hidden] { display: none !important; }
+    .shell { min-height: 100dvh; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 0 0 10px; }
+    .topbar, .controls { width: min(1440px, calc(100vw - 64px), calc((100dvh - 144px) * 1.7777778)); }
+    .topbar { display: flex; align-items: center; justify-content: space-between; height: 58px; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 12px; letter-spacing: .08em; }
+    .brand-mark { width: 22px; height: 22px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; transform: rotate(-5deg); }
+    .brand-mark i { background: var(--ink); } .brand-mark i:last-child { background: var(--accent); }
+    .top-actions { display: flex; align-items: center; gap: 20px; font-size: 12px; }
+    .text-button { border: 0; background: transparent; padding: 7px 0; }
+    .text-button:hover, .top-actions a:hover { color: var(--accent); }
+    .deck { position: relative; width: min(1440px, calc(100vw - 64px), calc((100dvh - 144px) * 1.7777778)); aspect-ratio: 16 / 9;
+      height: min(810px, calc((100vw - 64px) * .5625), calc(100dvh - 144px));
+      container-type: inline-size; background: var(--paper); box-shadow: 0 14px 45px #23382b12; }
+    .slide { width: 100%; height: 100%; padding: var(--space); position: relative; overflow: hidden;
+      display: flex; flex-direction: column; animation: enter .28s ease both; }
+    .eyebrow { display: flex; align-items: center; gap: .8em; font-size: var(--small); letter-spacing: .12em; color: var(--muted); margin-bottom: 1.8cqw; }
+    .eyebrow:before { content: ""; width: 2cqw; height: 2px; background: var(--accent); }
+    .eyebrow strong { color: var(--ink); font-weight: 600; }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2 { font-weight: 650; letter-spacing: -.045em; line-height: 1.27; }
+    h1 { font-size: 5cqw; } h2 { font-size: var(--title); }
+    h3 { font-size: 1.65cqw; line-height: 1.4; font-weight: 600; letter-spacing: -.02em; }
+    p { font-size: var(--body); line-height: 1.8; }
+    .serif { font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif; font-weight: 500; }
+    .muted { color: var(--muted); } .accent { color: var(--accent); } .green { color: var(--green); }
+    .mono { font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace; letter-spacing: -.025em; }
+    .intro { margin-top: 1cqw; color: var(--muted); max-width: 72cqw; }
+    .foot { margin-top: auto; padding-top: 1cqw; display: flex; justify-content: space-between; align-items: end; gap: 2cqw;
+      font-size: .94cqw; line-height: 1.55; color: var(--muted); }
+    .foot a { white-space: nowrap; }
+    .slide-num { position: absolute; right: 3.8cqw; top: 3.9cqw; font: 1.08cqw "Liberation Mono", monospace; color: var(--muted); }
+    .tag { display: inline-flex; align-items: center; gap: .5em; padding: .33em .7em; font-size: var(--small); line-height: 1.45;
+      background: var(--soft); color: var(--ink); border-radius: 3px; white-space: nowrap; }
+    .tag.red { background: #f0ddd2; color: #963c27; } .tag.green { background: var(--green-soft); color: var(--green); }
+    .rule { height: 1px; background: var(--line); margin: 1.6cqw 0; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 4cqw; }
+    .cover { display: grid; grid-template-columns: 1.22fr .78fr; gap: 2cqw; flex: 1; align-items: center; }
+    .cover h1 em { font-style: normal; color: var(--accent); }
+    .cover-copy { padding-bottom: 2cqw; }
+    .cover-copy p { margin-top: 1.8cqw; max-width: 43cqw; color: var(--muted); }
+    .cover-line { margin-top: 2.8cqw; border-left: 3px solid var(--accent); padding: .35cqw 0 .35cqw 1.2cqw; font-size: 1.45cqw; line-height: 1.8; }
+    .cover-art { position: relative; padding-left: 2cqw; border-left: 1px solid var(--line); }
+    .cover-art svg { width: 100%; display: block; }
+    .art-label { display: flex; justify-content: space-between; font-size: var(--small); margin-top: 1cqw; color: var(--muted); }
+    .large-index { font: 7cqw Georgia, serif; color: #b3b7a8; letter-spacing: -.07em; }
+    .matrix { width: 100%; border-collapse: collapse; margin-top: 2cqw; font-size: var(--body); text-align: left; }
+    .matrix th { color: var(--muted); font-weight: 400; font-size: var(--small); padding: 0 1cqw 1cqw 0; border-bottom: 1px solid var(--ink); }
+    .matrix td { padding: .8cqw 1cqw .8cqw 0; border-bottom: 1px solid var(--line); vertical-align: middle; line-height: 1.65; }
+    .matrix td:first-child { width: 25%; } .matrix td:nth-child(2) { width: 21%; } .matrix td:last-child { width: 19%; }
+    .matrix .sub { display: block; font-size: var(--small); color: var(--muted); margin-top: .3cqw; }
+    .callout { display: flex; align-items: center; gap: 1.2cqw; margin-top: 1.7cqw; padding: 1cqw 1.3cqw; background: var(--soft); font-size: var(--body); line-height: 1.65; }
+    .callout b { color: var(--accent); font-size: 1.7cqw; white-space: nowrap; }
+    .example { display: grid; grid-template-columns: 1.25fr .75fr; gap: 3cqw; margin-top: 1.8cqw; flex: 1; min-height: 0; }
+    .diagram { position: relative; padding: 1.1cqw 1.5cqw; background: #ebece3; display: flex; flex-direction: column; }
+    .diagram svg { width: 100%; flex: 1; min-height: 0; }
+    .diagram-label { font-size: var(--small); display: flex; justify-content: space-between; color: var(--muted); gap: 1em; }
+    .action { background: var(--ink); color: var(--paper); border: 1px solid var(--ink); padding: .65em 1em; font-size: var(--small); line-height: 1.3; transition: background .18s; }
+    .action:hover { background: var(--green); border-color: var(--green); }
+    .action.light { color: var(--ink); background: transparent; border-color: var(--line); }
+    .action.light:hover { background: var(--soft); }
+    .example-info { display: flex; flex-direction: column; padding: .3cqw 0; }
+    .big-metric { font: 4.1cqw Georgia, "Times New Roman", serif; letter-spacing: -.055em; margin: .5cqw 0; }
+    .metric-label { font-size: var(--small); color: var(--muted); }
+    .example-info h3 { margin-top: 1.3cqw; } .example-info p { margin-top: .55cqw; }
+    .sequence { color: var(--accent); font-size: 1.7cqw; margin: .6cqw 0; white-space: nowrap; }
+    .diagram-note { font-size: .9cqw; color: var(--muted); line-height: 1.55; }
+    .mechanisms { margin-top: 2.1cqw; gap: 4cqw; flex: 1; }
+    .mechanism { display: flex; flex-direction: column; }
+    .mechanism + .mechanism { border-left: 1px solid var(--line); padding-left: 3cqw; }
+    .mechanism h3 { margin: .9cqw 0 .7cqw; font-size: 2cqw; }
+    .mechanism p { margin-top: .7cqw; }
+    .formula { margin: 1.3cqw 0 .3cqw; padding: 1.4cqw; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 1.4cqw; line-height: 1.9; }
+    .result24 { display: flex; align-items: center; gap: 1.4cqw; margin-top: .3cqw; }
+    .result24 span:first-child { font: 4.8cqw Georgia, serif; color: var(--green); }
+    .result24 p { margin: 0; line-height: 1.5; }
+    .core-grid { display: grid; grid-template-columns: 1.12fr .88fr; gap: 3.2cqw; margin-top: 1.8cqw; flex: 1; }
+    .off-flags { display: flex; gap: .55cqw; margin-bottom: 1.4cqw; flex-wrap: wrap; }
+    .off-flags .tag { background: transparent; border: 1px solid var(--line); }
+    .status-dot { width: .45em; height: .45em; border-radius: 50%; background: #92998f; display: inline-block; }
+    .flow { display: grid; gap: .7cqw; }
+    .flow-item { display: grid; grid-template-columns: 2cqw 1fr; gap: .8cqw; align-items: start; }
+    .flow-item .number { font: 1.25cqw Georgia, serif; color: var(--accent); padding-top: .15cqw; }
+    .flow-item h3 { font-size: 1.45cqw; } .flow-item p { font-size: 1.14cqw; color: var(--muted); }
+    .seed-demo { background: var(--ink); color: var(--paper); padding: 2cqw; display: flex; flex-direction: column; }
+    .seed-demo .muted { color: #bac6ba; }
+    .seed-demo .tag { background: #354440; color: #e1e9dd; }
+    .seed-row { display: flex; justify-content: space-between; gap: 1cqw; padding: .8cqw 0; border-bottom: 1px solid #53605a; font-size: 1.6cqw; }
+    .seed-value { color: #e9b891; }
+    .seed-demo .action { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+    .seed-demo .action:hover { background: #e1bfa7; border-color: #e1bfa7; }
+    .seed-actions { display: flex; gap: .6cqw; margin: 1.1cqw 0 .8cqw; flex-wrap: wrap; }
+    .seed-actions .action { padding: .55em .65em; }
+    .seed-demo p { font-size: 1.15cqw; line-height: 1.7; }
+    .seed-caption { min-height: 3.7em; } .seed-demo .diagram-note { color: #bac6ba; margin-top: auto; }
+    .evidence-layout { margin-top: 1.3cqw; display: grid; grid-template-columns: 1.2fr .8fr; gap: 3.6cqw; flex: 1; }
+    .evidence-list { display: flex; flex-direction: column; }
+    .evidence-line { display: grid; grid-template-columns: 2.7cqw 1fr auto; gap: .7cqw; align-items: center; padding: .7cqw 0; border-bottom: 1px solid var(--line); }
+    .evidence-line .mark { font: 1.1cqw "Liberation Mono", monospace; color: var(--green); }
+    .evidence-line b { font-size: 1.32cqw; font-weight: 500; }
+    .evidence-line small { display: block; color: var(--muted); font-size: var(--small); margin-top: .2cqw; }
+    .pending { border-top: 3px solid var(--accent); padding: 1.4cqw 0; }
+    .pending h3 { font-size: 2cqw; margin: .8cqw 0; }
+    .pending p { color: var(--muted); margin-bottom: 1cqw; }
+    .metric-names { font: 1.6cqw/1.8 "Liberation Mono", monospace; color: var(--accent); padding: 1cqw 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .roadmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.4cqw; margin-top: 2.7cqw; }
+    .phase { border-top: 2px solid var(--ink); padding-top: 1cqw; }
+    .phase.active { border-top-color: var(--accent); }
+    .phase-index { font: 3.8cqw Georgia, serif; color: #a4aa9c; line-height: 1.2; margin-bottom: .8cqw; }
+    .phase.active .phase-index { color: var(--accent); }
+    .phase h3 { margin-bottom: .8cqw; font-size: 1.9cqw; }
+    .phase p { color: var(--muted); font-size: 1.23cqw; }
+    .phase-output { margin-top: 1.1cqw; padding-top: .9cqw; border-top: 1px solid var(--line); font-size: 1.12cqw; line-height: 1.7; }
+    .decision { margin-top: auto; padding: 1.15cqw 1.5cqw; background: var(--ink); color: var(--paper); display: flex; gap: 1.8cqw; align-items: center; }
+    .decision span { font-size: var(--small); color: #c8d4c7; white-space: nowrap; } .decision p { font-size: 1.38cqw; }
+    .controls { display: flex; justify-content: space-between; align-items: center; height: 62px; gap: 20px; }
+    .page-info { display: flex; gap: 14px; align-items: baseline; font-size: 12px; color: var(--muted); }
+    .page-count { color: var(--ink); font: 15px "Liberation Mono", monospace; }
+    .nav { display: flex; align-items: center; gap: 20px; }
+    .dots { display: flex; gap: 10px; }
+    .dot { padding: 6px 0; border: 0; background: transparent; width: 22px; }
+    .dot:after { content: ""; display: block; height: 3px; background: #b8bfb3; transition: background .2s; }
+    .dot[aria-current="step"]:after { background: var(--accent); }
+    .arrow { width: 38px; height: 32px; border: 1px solid #b9c2b6; background: transparent; font-size: 19px; }
+    .arrow:hover:enabled { background: var(--paper); }
+    .progress { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--accent); width: calc(100% / 7); transition: width .25s ease; pointer-events: none; }
+    dialog { border: 1px solid var(--line); background: var(--paper); padding: 28px; color: var(--ink); width: min(790px, calc(100vw - 40px)); max-height: calc(100dvh - 40px); }
+    dialog::backdrop { background: #15241fbb; backdrop-filter: blur(4px); }
+    .dialog-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .dialog-head h2 { font-size: 23px; }
+    .overview-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .overview-item { border: 1px solid var(--line); background: transparent; padding: 18px; text-align: left; display: flex; align-items: center; gap: 15px; line-height: 1.6; }
+    .overview-item:hover, .overview-item[aria-current="step"] { background: var(--soft); border-color: var(--accent); }
+    .overview-item span { font: 24px Georgia, serif; color: var(--accent); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation: none !important; transition: none !important; } }
+    @media screen and (max-width: 700px) {
+      :root { --body: 15px; --small: 12px; --title: 30px; --space: 25px; }
+      .shell { justify-content: start; padding-bottom: 0; } .topbar, .controls, .deck { width: calc(100vw - 24px); }
+      .topbar { height: 62px; gap: 8px; } .brand { font-size: 11px; gap: 7px; letter-spacing: 0; } .brand-mark { width: 18px; height: 18px; }
+      .top-actions { gap: 12px; font-size: 11px; } .desktop-only { display: none; }
+      .deck { height: auto; aspect-ratio: auto; container-type: normal; } .slide { min-height: calc(100dvh - 124px); height: auto; padding-bottom: 30px; overflow: visible; }
+      .eyebrow { margin: 0 30px 25px 0; font-size: 10px; } .eyebrow:before { width: 18px; }
+      .slide-num { right: 25px; top: 26px; font-size: 11px; } h1 { font-size: 39px; } h3 { font-size: 20px; }
+      .intro { max-width: none; margin-top: 14px; } .cover { grid-template-columns: 1fr; gap: 25px; }
+      .cover-copy { padding-bottom: 0; } .cover-copy p { max-width: none; margin-top: 18px; }
+      .cover-line { margin-top: 22px; padding: 4px 0 4px 12px; font-size: 15px; }
+      .cover-art { border: 0; padding: 0; max-width: 330px; width: 100%; justify-self: center; }
+      .cover-art svg { max-height: 240px; } .art-label { font-size: 11px; }
+      .foot { margin-top: 25px; font-size: 10px; padding-top: 15px; }
+      .matrix { margin-top: 24px; font-size: 12px; } .matrix th { font-size: 10px; padding: 0 8px 10px 0; }
+      .matrix td { padding: 15px 8px 15px 0; } .matrix td:first-child { width: 27%; }
+      .matrix .sub { font-size: 10px; } .matrix .tag { font-size: 10px; padding: 3px 5px; white-space: normal; }
+      .matrix .mono { overflow-wrap: anywhere; } .matrix td:last-child { width: 18%; }
+      .callout { margin-top: 20px; padding: 14px; gap: 10px; align-items: start; font-size: 13px; }
+      .callout b { font-size: 16px; } .example, .split, .core-grid, .evidence-layout { grid-template-columns: 1fr; gap: 22px; margin-top: 24px; }
+      .diagram { min-height: 270px; padding: 15px; } .diagram-label { font-size: 11px; } .diagram-note { font-size: 10px; }
+      .example-info { gap: 6px; } .sequence { font-size: 20px; margin: 8px 0; } .big-metric { font-size: 45px; }
+      .example-info h3 { margin-top: 12px; } .rule { margin: 12px 0; }
+      .mechanism h3 { font-size: 24px; margin: 12px 0 8px; } .mechanism p { margin-top: 10px; }
+      .mechanism + .mechanism { border-left: 0; border-top: 1px solid var(--line); padding: 20px 0 0; }
+      .formula { margin-top: 15px; padding: 15px 0; font-size: 14px; } .result24 { gap: 18px; margin-top: 10px; } .result24 span:first-child { font-size: 58px; }
+      .off-flags { gap: 6px; margin-bottom: 20px; } .flow { gap: 17px; } .flow-item { grid-template-columns: 22px 1fr; gap: 10px; }
+      .flow-item .number { font-size: 17px; } .flow-item h3 { font-size: 18px; } .flow-item p { font-size: 14px; }
+      .seed-demo { padding: 22px; } .seed-row { font-size: 20px; padding: 14px 0; } .seed-actions { gap: 8px; margin: 18px 0 12px; }
+      .seed-demo p { font-size: 14px; } .seed-demo .diagram-note { font-size: 10px; margin-top: 15px; }
+      .evidence-line { padding: 14px 0; grid-template-columns: 24px 1fr auto; gap: 6px; }
+      .evidence-line .mark { font-size: 12px; } .evidence-line b { font-size: 15px; } .evidence-line small { font-size: 11px; margin-top: 4px; }
+      .evidence-line .tag { font-size: 10px; } .pending { padding: 15px 0; } .pending h3 { font-size: 25px; margin: 12px 0; }
+      .metric-names { padding: 12px 0; font-size: 21px; } .pending p { margin-bottom: 12px; }
+      .roadmap { grid-template-columns: 1fr; gap: 24px; margin-top: 26px; } .phase { padding-top: 14px; }
+      .phase-index { font-size: 40px; margin-bottom: 10px; } .phase h3 { font-size: 22px; margin-bottom: 8px; } .phase p { font-size: 15px; }
+      .phase-output { margin-top: 14px; padding-top: 12px; font-size: 13px; } .decision { margin-top: 25px; padding: 18px; flex-direction: column; align-items: start; gap: 8px; }
+      .decision p { font-size: 15px; } .controls { height: 62px; gap: 10px; } .nav { gap: 10px; } .dots { gap: 5px; } .dot { width: 13px; }
+      .arrow { width: 30px; } .page-info { gap: 6px; font-size: 10px; } .page-count { font-size: 12px; }
+      .overview-list { grid-template-columns: 1fr; } dialog { padding: 20px; } .overview-item { padding: 12px; }
+    }
+    @page { size: 320mm 180mm; margin: 0; }
+    @media print {
+      :root { --body: 1.39cqw; --small: 1.04cqw; --title: 3.7cqw; --space: 3.8cqw; }
+      html, body { height: auto; background: white; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .shell { display: block; padding: 0; min-height: 0; } .topbar, .controls, .progress, dialog, .no-print { display: none !important; }
+      .deck { width: 320mm; height: auto; aspect-ratio: auto; box-shadow: none; container-type: inline-size; }
+      .slide, .slide[hidden] { display: flex !important; width: 320mm; height: 180mm; padding: 12.16mm; overflow: hidden; break-after: page; animation: none; }
+      .slide:last-of-type { break-after: auto; } .action { display: none; } .foot a { text-decoration: none; }
+      .overview-list { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>OpenROAD</b><span class="desktop-only">/</span><span>GPL 研究汇报</span></div>
+      <nav class="top-actions" aria-label="演示工具">
+        <a href="global_placement_odb_order_sensitivity.md" target="_blank" rel="noopener">研究全文 ↗</a>
+        <button class="text-button" id="overview-button" aria-haspopup="dialog">目录</button>
+        <button class="text-button desktop-only" id="print-button" title="打印全部 7 页或保存为 PDF">打印 / PDF</button>
+        <button class="text-button" id="fullscreen-button" title="进入或退出全屏（F）">全屏</button>
+      </nav>
+    </header>
+
+    <main class="deck" aria-label="GPL 迭代顺序敏感性演示，共 7 页">
+      <section class="slide" id="slide-1" aria-labelledby="title-1" data-title="核心结论">
+        <div class="eyebrow"><strong>RESEARCH BRIEF</strong> / 迭代顺序与布局质量</div><span class="slide-num" aria-hidden="true">01 / 07</span>
+        <div class="cover">
+          <div class="cover-copy">
+            <h1 id="title-1">GPL 的顺序依赖，<br>不止来自<br><em>三个 feature。</em></h1>
+            <p>相同的设计与参数，改变 ODB 对象的遍历顺序，<br class="desktop-only">仍可能改变优化起点和数值计算轨迹。</p>
+            <div class="cover-line">initial、timing、routability 全关闭，<br><strong>基础 Nesterov 仍存在顺序敏感路径。</strong></div>
+          </div>
+          <div class="cover-art">
+            <svg viewBox="0 0 370 330" role="img" aria-label="同一组 A、B、C 实例，改变遍历顺序后获得不同的随机位移分配">
+              <defs><pattern id="cover-grid" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M22 0H0V22" fill="none" stroke="#c9cebf" stroke-width=".6"/></pattern></defs>
+              <rect x="8" y="15" width="345" height="292" fill="url(#cover-grid)"/>
+              <text x="26" y="40" font-size="11" fill="#64706a" font-family="monospace">SAME OBJECTS / DIFFERENT ORDER</text>
+              <g fill="#f5f2e9" stroke="#202c2b" stroke-width="1.5"><rect x="34" y="73" width="67" height="61"/><rect x="142" y="73" width="67" height="61"/><rect x="250" y="73" width="67" height="61"/></g>
+              <g font-size="25" font-family="Georgia, serif" fill="#202c2b" text-anchor="middle"><text x="67" y="112">A</text><text x="175" y="112">B</text><text x="283" y="112">C</text></g>
+              <g fill="none" stroke="#be482e" stroke-width="1.7"><path d="M67 142C67 183 175 170 175 211"/><path d="M175 142C175 183 67 170 67 211"/><path d="M283 142V211"/></g>
+              <g fill="#202c2b"><rect x="34" y="220" width="67" height="61"/><rect x="142" y="220" width="67" height="61"/><rect x="250" y="220" width="67" height="61"/></g>
+              <g font-size="25" font-family="Georgia, serif" fill="#f5f2e9" text-anchor="middle"><text x="67" y="259">B</text><text x="175" y="259">A</text><text x="283" y="259">C</text></g>
+              <circle cx="121" cy="177" r="5" fill="#be482e"/>
+            </svg>
+            <div class="art-label"><span>同一 seed ≠ 同一实例扰动</span><span class="mono">ODB → GPL</span></div>
+          </div>
+        </div>
+        <footer class="foot"><span>研究范围：当前 CPU 实现 / 普通单 block 设计</span><span>源码分析 + 机制验证；最终 QoR 影响待量化</span></footer>
+      </section>
+
+      <section class="slide" id="slide-2" aria-labelledby="title-2" data-title="四种配置的判断" hidden>
+        <div class="eyebrow"><strong>01 / FINDINGS</strong> / 结论总览</div><span class="slide-num" aria-hidden="true">02 / 07</span>
+        <h2 id="title-2">四种配置，都存在顺序敏感路径。</h2>
+        <table class="matrix">
+          <thead><tr><th scope="col">配置 / 功能</th><th scope="col">主要依赖</th><th scope="col">对结果的传播路径</th><th scope="col">证据</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mono">initial_place</span></td><td><span class="tag red">离散建模</span></td><td>并列极值选先到的 pin<span class="sub">B2B 边集、方程和一轮求解结果改变</span></td><td>精确算术反例</td></tr>
+            <tr><td><span class="mono">timing_driven</span></td><td><span class="tag">数值 / 间接</span></td><td>上游电容累加、公共布局输入<span class="sub">固定 slack 后，加权内核对顺序独立</span></td><td>源码路径<br>24 种排列验证</td></tr>
+            <tr><td><span class="mono">routability_driven</span></td><td><span class="tag">数值 + 可选离散</span></td><td>RUDY 需求累加、同分选择、GRT root<span class="sub">同分 net 加权默认关闭；GRT 影响与配置有关</span></td><td>浮点与选择反例</td></tr>
+            <tr><td><strong>三个 feature 全关闭</strong></td><td><span class="tag red">起点 + 数值</span></td><td>Nesterov 扰动分配、pin / cell 归约<span class="sub">关闭扰动后，仍有浮点累加路径</span></td><td>源码闭环</td></tr>
+          </tbody>
+        </table>
+        <div class="callout"><b>判断口径</b><span>存在顺序依赖，不代表每个设计、每次置换，都会出现可见的最终 QoR 变化。</span></div>
+        <footer class="foot"><span>控制变量：对象、ID、连接、几何、初始坐标和约束不变，仅置换返回序列。</span><a href="global_placement_odb_order_sensitivity.md#1-结论" target="_blank" rel="noopener">完整研究 §1–2 ↗</a></footer>
+      </section>
+
+      <section class="slide" id="slide-3" aria-labelledby="title-3" data-title="初始布局的直接反例" hidden>
+        <div class="eyebrow"><strong>02 / MECHANISM</strong> / initial_place</div><span class="slide-num" aria-hidden="true">03 / 07</span>
+        <h2 id="title-3">两个同坐标 pin 交换顺序，<br><span class="accent">求解方程就可能不同。</span></h2>
+        <div class="example">
+          <div class="diagram">
+            <div class="diagram-label"><span>B2B 连接关系示意</span><span id="extreme-label">min-X = A / max-X = D</span></div>
+            <svg viewBox="0 0 590 270" role="img" aria-label="A 与 B 的 X 坐标相同；交换顺序后 B2B 边从 AC 变为 BC" id="b2b-svg">
+              <path d="M80 58V207M80 58L520 135M80 207L520 135M300 135H520" stroke="#a0aaa0" stroke-width="2" fill="none"/>
+              <path id="tie-edge" d="M80 58L300 135" stroke="#be482e" stroke-width="4" fill="none"/>
+              <g stroke-width="2"><circle id="node-a" cx="80" cy="58" r="24" fill="#be482e" stroke="#be482e"/><circle id="node-b" cx="80" cy="207" r="24" fill="#f5f2e9" stroke="#202c2b"/><circle cx="300" cy="135" r="24" fill="#f5f2e9" stroke="#202c2b"/><rect x="496" y="111" width="48" height="48" fill="#202c2b" stroke="#202c2b"/></g>
+              <g font-size="23" text-anchor="middle" font-family="Georgia, serif"><text id="label-a" x="80" y="66" fill="#fff">A</text><text id="label-b" x="80" y="215" fill="#202c2b">B</text><text x="300" y="143" fill="#202c2b">C</text><text x="520" y="143" fill="#f5f2e9">D</text></g>
+              <g font-size="13" fill="#64706a" text-anchor="middle" font-family="monospace"><text x="80" y="23">x = 0</text><text x="80" y="252">x = 0</text><text x="300" y="185">x = 10</text><text x="520" y="185">x = 20</text></g>
+              <text id="edge-label" x="183" y="75" font-size="16" fill="#be482e" font-family="monospace">AC</text>
+            </svg>
+            <div class="diagram-note">仅标示 X 关系，非实际布线。模型另含 A–L、B–R 两个固定锚点 net。</div>
+          </div>
+          <div class="example-info">
+            <span class="metric-label">ODB PIN 顺序</span><div class="sequence mono" id="pin-sequence">A → B → C → D</div>
+            <button class="action no-print" id="swap-pins" aria-pressed="false">交换 A / B，观察模型</button>
+            <div class="rule"></div>
+            <span class="metric-label">一轮精确求解的模型 X-HPWL</span><div class="big-metric" id="hpwl-metric">52.459016393</div>
+            <span class="tag red" id="edge-tag">AC 入选 · BC 不入选</span>
+            <h3>先遇到的 pin 赢得并列极值</h3><p class="muted">极值代表改变 → 边集改变 → 方程改变。<br>此例不依赖浮点舍入。</p>
+          </div>
+        </div>
+        <footer class="foot"><span>归一化坐标；有理数模型验证，仅一轮 B2B 求解。数值不代表完整 GPL 的最终 QoR。</span><a href="global_placement_odb_order_sensitivity.md#4-initial_place" target="_blank" rel="noopener">完整研究 §4 ↗</a></footer>
+      </section>
+
+      <section class="slide" id="slide-4" aria-labelledby="title-4" data-title="时序与可布线性" hidden>
+        <div class="eyebrow"><strong>03 / DISTINCTIONS</strong> / timing & routability</div><span class="slide-num" aria-hidden="true">04 / 07</span>
+        <h2 id="title-4">有些排序已稳定，<br>顺序仍能从其他路径进入。</h2>
+        <div class="split mechanisms">
+          <article class="mechanism">
+            <div><span class="tag green">TIMING</span></div><h3>固定 slack，权重不随排列改变</h3>
+            <p class="muted">net 已按 slack + ID 排名，再按各自 slack 查询权重；修复 driver 也按 level + name 排序。</p>
+            <div class="result24"><span>24</span><p>四个 net 的全部输入排列<br><strong>得到相同权重</strong></p></div>
+            <div class="formula mono">slack map → cutoff → weight(net)</div>
+            <p>完整流程仍受上游电容的 float 累加、<br>公共布局坐标和梯度影响。</p>
+          </article>
+          <article class="mechanism">
+            <div><span class="tag red">ROUTABILITY</span></div><h3>默认 RUDY 存在跨 net 累加</h3>
+            <p class="muted">同一 tile 的需求按 ODB net 顺序以 float 累加；舍入差异接近阈值时可改变反馈决策。</p>
+            <div class="formula mono">net₁ + net₂ + … → tile demand<br>→ congestion → inflation / revert</div>
+            <p>可选同分 net 加权：可能选中不同对象。<br>GRT pin 去重：可能改变物理 root。</p>
+            <p class="muted" style="font-size:var(--small)">边界：net 加权默认关闭；GRT net 总表已按名称排序，root 的路由影响取决于配置。</p>
+          </article>
+        </div>
+        <footer class="foot"><span>固定输入的内核独立性，与整个功能的结果独立性，需要分别判断。</span><a href="global_placement_odb_order_sensitivity.md#5-timing_driven" target="_blank" rel="noopener">完整研究 §5–6 ↗</a></footer>
+      </section>
+
+      <section class="slide" id="slide-5" aria-labelledby="title-5" data-title="三个 feature 全关闭" hidden>
+        <div class="eyebrow"><strong>04 / BASELINE</strong> / 基础 GPL</div><span class="slide-num" aria-hidden="true">05 / 07</span>
+        <h2 id="title-5">三个 feature 全关，<br><span class="accent">Nesterov 的顺序依赖仍在。</span></h2>
+        <div class="core-grid">
+          <div>
+            <div class="off-flags"><span class="tag"><i class="status-dot"></i> initial OFF</span><span class="tag"><i class="status-dot"></i> timing OFF</span><span class="tag"><i class="status-dot"></i> routability OFF</span></div>
+            <div class="flow">
+              <div class="flow-item"><span class="number">01</span><div><h3>实例顺序决定扰动分配</h3><p>相同 seed 产生相同随机流，但实例与随机位移的对应关系可能改变。</p></div></div>
+              <div class="flow-item"><span class="number">02</span><div><h3>pin 顺序决定 WA 累加次序</h3><p>net 内指数和、cell 内 pin 梯度，仍使用逐项浮点求和。</p></div></div>
+              <div class="flow-item"><span class="number">03</span><div><h3>cell 顺序进入 penalty 与 step</h3><p>梯度总和、距离范数的舍入，可进一步影响密度惩罚和更新步长。</p></div></div>
+            </div>
+          </div>
+          <div class="seed-demo">
+            <div class="diagram-label"><span style="color:#c8d4c7">机制演示 / 固定 seed</span><span class="tag" id="perturb-label">默认扰动</span></div>
+            <div class="sequence mono" id="instance-sequence" style="color:#e9b891;margin-top:1.3cqw">A → B</div>
+            <div class="seed-row"><span>实例 A</span><span class="seed-value mono" id="seed-a">r₁</span></div>
+            <div class="seed-row"><span>实例 B</span><span class="seed-value mono" id="seed-b">r₂</span></div>
+            <div class="seed-actions no-print"><button class="action" id="swap-instances" aria-pressed="false">交换实例顺序</button><button class="action" id="toggle-perturb" aria-pressed="false">关闭扰动</button></div>
+            <p class="seed-caption" id="seed-caption">同一随机流，分配给不同实例。<br>优化起点随遍历顺序变化。</p>
+            <p class="diagram-note">符号示意，非生产运行。扰动设为 0 只排除此来源；浮点归约路径仍然存在。</p>
+          </div>
+        </div>
+        <footer class="foot"><span>固定 vector 顺序的串行归约可重复，不等于对 vector 的任意置换不变。</span><a href="global_placement_odb_order_sensitivity.md#10-三个-feature-全关闭后基础-gpl-是否仍敏感" target="_blank" rel="noopener">完整研究 §10 ↗</a></footer>
+      </section>
+
+      <section class="slide" id="slide-6" aria-labelledby="title-6" data-title="证据与结论边界" hidden>
+        <div class="eyebrow"><strong>05 / CONFIDENCE</strong> / 证据边界</div><span class="slide-num" aria-hidden="true">06 / 07</span>
+        <h2 id="title-6">已确认影响机制，<br>实际工程影响仍需量化。</h2>
+        <div class="evidence-layout">
+          <div class="evidence-list">
+            <div class="evidence-line"><span class="mark">01</span><div><b>B2B：边集、精确解和模型 HPWL 不同</b><small>有理数反例 / 一轮求解</small></div><span class="tag green">已验证</span></div>
+            <div class="evidence-line"><span class="mark">02</span><div><b>Timing：固定 slack 的 24 种排列一致</b><small>加权内核 / 不代表完整 timing 流程</small></div><span class="tag green">已验证</span></div>
+            <div class="evidence-line"><span class="mark">03</span><div><b>Float32：累加顺序可改变末位</b><small>非结合性示例 / 不是实际设计测量</small></div><span class="tag green">已验证</span></div>
+            <div class="evidence-line"><span class="mark">04</span><div><b>RUDY：同分 top-K 的加权对象不同</b><small>C++ 选择反例 / 需启用可选 net 加权</small></div><span class="tag green">已验证</span></div>
+            <div class="evidence-line"><span class="mark">05</span><div><b>GRT：重合 pin 顺序可改变物理 root</b><small>C++ 去重规则反例 / 后续影响与配置有关</small></div><span class="tag green">已验证</span></div>
+          </div>
+          <aside class="pending">
+            <span class="tag red">尚未量化</span><h3>真实设计的<br>最终 QoR 差值</h3>
+            <div class="metric-names">HPWL / WNS<br>TNS / RC / Overflow</div>
+            <p style="margin-top:1cqw">尚无设计级变化幅度、发生概率<br>或统计显著性的结论。</p>
+            <p style="font-size:var(--small)">小程序复现相关规则，未链接当前生产函数。现有二进制与研究源码版本不一致，未用于当前版本的端到端举证。</p>
+          </aside>
+        </div>
+        <footer class="foot"><span>“存在传播机制”和“实际 QoR 显著变化”是两个不同层级的结论。</span><a href="global_placement_odb_order_sensitivity.md#7-已完成验证与结论边界" target="_blank" rel="noopener">完整研究 §7 / 附录 ↗</a></footer>
+      </section>
+
+      <section class="slide" id="slide-7" aria-labelledby="title-7" data-title="建议与下一步" hidden>
+        <div class="eyebrow"><strong>06 / NEXT STEP</strong> / 行动建议</div><span class="slide-num" aria-hidden="true">07 / 07</span>
+        <h2 id="title-7">把顺序不变性作为独立目标，<br>用对照实验界定影响。</h2>
+        <div class="roadmap">
+          <article class="phase active"><div class="phase-index">01</div><h3>建立一致基线</h3><p>选取代表设计，构建与源码一致的二进制；固定对象 ID、几何、约束、线程和 seed。</p><div class="phase-output"><strong>产出</strong><br>可重复运行的设计与配置基线</div></article>
+          <article class="phase"><div class="phase-index">02</div><h3>隔离顺序变量</h3><p>在消费边界分别置换 instance、net、pin；逐项比较原序、逆序和固定 seed 的 shuffle。</p><div class="phase-output"><strong>产出</strong><br>最早分岔位置 + 最终 QoR 差值</div></article>
+          <article class="phase"><div class="phase-index">03</div><h3>按证据选择修复点</h3><p>稳定同分选择、绑定实例扰动身份，再评估浮点归约的规范化及其运行成本。</p><div class="phase-output"><strong>产出</strong><br>修复收益、性能成本与回归约束</div></article>
+        </div>
+        <div class="decision"><span>本次核心判断</span><p>关闭 feature 不足以建立顺序不变性。下一步应量化“差多少、从哪里开始不同”。</p></div>
+        <footer class="foot"><span>源码基线 <span class="mono">016cc5e3e211</span> · CPU / 单 block · 不含 GPU、3DIC 与层次化全分支审计</span><a href="global_placement_odb_order_sensitivity.md" target="_blank" rel="noopener">打开完整研究文档 ↗</a></footer>
+      </section>
+      <div class="progress" id="progress" aria-hidden="true"></div>
+    </main>
+
+    <footer class="controls">
+      <div class="page-info"><span class="page-count" id="page-count">01 / 07</span><span id="page-title">核心结论</span><span class="desktop-only">· ← → 翻页 / F 全屏</span></div>
+      <nav class="nav" aria-label="页面导航"><button class="arrow" id="prev" aria-label="上一页" disabled>←</button><div class="dots" id="dots"></div><button class="arrow" id="next" aria-label="下一页">→</button></nav>
+    </footer>
+  </div>
+  <dialog id="overview" aria-labelledby="overview-title">
+    <div class="dialog-head"><h2 id="overview-title">汇报目录</h2><button class="text-button" id="close-overview" aria-label="关闭目录">关闭 ×</button></div>
+    <div class="overview-list" id="overview-list"></div>
+  </dialog>
+  <div class="sr-only" id="announcement" role="status" aria-live="polite"></div>
+  <noscript><style>.slide[hidden]{display:flex !important}.deck{aspect-ratio:auto}.slide{height:auto;min-height:75vh;margin-bottom:25px}.controls,.text-button,.no-print{display:none}</style><p>JavaScript 未启用，以下以连续页面显示全部内容。</p></noscript>
+  <script>
+    (() => {
+      'use strict';
+      const slides = [...document.querySelectorAll('.slide')];
+      const overview = document.getElementById('overview');
+      const prev = document.getElementById('prev');
+      const next = document.getElementById('next');
+      const dots = document.getElementById('dots');
+      const overviewList = document.getElementById('overview-list');
+      let current = 0;
+      const pad = number => String(number).padStart(2, '0');
+      slides.forEach((slide, index) => {
+        const dot = document.createElement('button');
+        dot.className = 'dot';
+        dot.setAttribute('aria-label', `第 ${index + 1} 页：${slide.dataset.title}`);
+        dot.addEventListener('click', () => show(index));
+        dots.append(dot);
+        const item = document.createElement('button');
+        item.className = 'overview-item';
+        const number = document.createElement('span');
+        number.textContent = pad(index + 1);
+        item.append(number, document.createTextNode(slide.dataset.title));
+        item.addEventListener('click', () => { overview.close(); show(index); });
+        overviewList.append(item);
+      });
+      function show(index, updateHash = true) {
+        current = Math.max(0, Math.min(slides.length - 1, index));
+        const active = document.activeElement;
+        const focusWasInSlide = active && slides.some(slide => slide.contains(active));
+        slides.forEach((slide, i) => { slide.hidden = i !== current; });
+        prev.disabled = current === 0;
+        next.disabled = current === slides.length - 1;
+        document.getElementById('page-count').textContent = `${pad(current + 1)} / ${pad(slides.length)}`;
+        document.getElementById('page-title').textContent = slides[current].dataset.title;
+        document.getElementById('progress').style.width = `${(current + 1) / slides.length * 100}%`;
+        [...dots.children, ...overviewList.children].forEach((el, i) => {
+          if (i % slides.length === current) el.setAttribute('aria-current', 'step');
+          else el.removeAttribute('aria-current');
+        });
+        document.getElementById('announcement').textContent = `第 ${current + 1} 页，共 ${slides.length} 页，${slides[current].dataset.title}`;
+        if (focusWasInSlide) {
+          const title = slides[current].querySelector('h1, h2');
+          title.setAttribute('tabindex', '-1'); title.focus({ preventScroll: true });
+        }
+        if (updateHash) history.replaceState(null, '', `#slide-${current + 1}`);
+        if (matchMedia('(max-width: 700px)').matches) window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+      function fromHash() {
+        const match = location.hash.match(/^#slide-(\d+)$/);
+        show(match ? Number(match[1]) - 1 : 0, false);
+      }
+      prev.addEventListener('click', () => show(current - 1));
+      next.addEventListener('click', () => show(current + 1));
+      document.getElementById('overview-button').addEventListener('click', () => overview.showModal());
+      document.getElementById('close-overview').addEventListener('click', () => overview.close());
+      overview.addEventListener('click', event => { if (event.target === overview) {
+        const box = overview.getBoundingClientRect();
+        if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) overview.close();
+      }});
+      document.getElementById('print-button').addEventListener('click', () => window.print());
+      const fullButton = document.getElementById('fullscreen-button');
+      async function fullscreen() {
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+          else await document.documentElement.requestFullscreen();
+        } catch { document.getElementById('announcement').textContent = '当前浏览器未允许全屏，可使用浏览器全屏功能。'; }
+      }
+      fullButton.addEventListener('click', fullscreen);
+      document.addEventListener('fullscreenchange', () => { fullButton.textContent = document.fullscreenElement ? '退出全屏' : '全屏'; });
+      if (!document.fullscreenEnabled) fullButton.hidden = true;
+      document.addEventListener('keydown', event => {
+        if (event.altKey || event.ctrlKey || event.metaKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName) || event.target.isContentEditable) return;
+        if (overview.open) return;
+        if (event.key === 'ArrowRight' || event.key === 'PageDown' || (event.key === ' ' && !event.target.closest('button, a'))) { event.preventDefault(); show(current + 1); }
+        else if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); show(current - 1); }
+        else if (event.key === 'Home') { event.preventDefault(); show(0); }
+        else if (event.key === 'End') { event.preventDefault(); show(slides.length - 1); }
+        else if (event.key.toLowerCase() === 'f') { event.preventDefault(); fullscreen(); }
+        else if (event.key.toLowerCase() === 'o') { event.preventDefault(); overview.showModal(); }
+      });
+      let touchStart = null;
+      document.querySelector('.deck').addEventListener('touchstart', event => {
+        if (!event.target.closest('button, a') && event.touches.length === 1) touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+        else touchStart = null;
+      }, { passive: true });
+      document.querySelector('.deck').addEventListener('touchend', event => {
+        if (!touchStart || !event.changedTouches.length) return;
+        const dx = event.changedTouches[0].clientX - touchStart.x;
+        const dy = event.changedTouches[0].clientY - touchStart.y;
+        if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.7) show(current + (dx < 0 ? 1 : -1));
+        touchStart = null;
+      }, { passive: true });
+      let swappedPins = false;
+      document.getElementById('swap-pins').addEventListener('click', event => {
+        swappedPins = !swappedPins;
+        event.currentTarget.setAttribute('aria-pressed', String(swappedPins));
+        document.getElementById('extreme-label').textContent = `min-X = ${swappedPins ? 'B' : 'A'} / max-X = D`;
+        document.getElementById('pin-sequence').textContent = swappedPins ? 'B → A → C → D' : 'A → B → C → D';
+        document.getElementById('hpwl-metric').textContent = swappedPins ? '52.338709677' : '52.459016393';
+        document.getElementById('edge-tag').textContent = swappedPins ? 'BC 入选 · AC 不入选' : 'AC 入选 · BC 不入选';
+        document.getElementById('tie-edge').setAttribute('d', swappedPins ? 'M80 207L300 135' : 'M80 58L300 135');
+        const edgeLabel = document.getElementById('edge-label');
+        edgeLabel.textContent = swappedPins ? 'BC' : 'AC'; edgeLabel.setAttribute('y', swappedPins ? '222' : '75');
+        for (const name of ['a', 'b']) {
+          const active = name === (swappedPins ? 'b' : 'a');
+          document.getElementById(`node-${name}`).setAttribute('fill', active ? '#be482e' : '#f5f2e9');
+          document.getElementById(`node-${name}`).setAttribute('stroke', active ? '#be482e' : '#202c2b');
+          document.getElementById(`label-${name}`).setAttribute('fill', active ? '#fff' : '#202c2b');
+        }
+        document.getElementById('announcement').textContent = `${document.getElementById('pin-sequence').textContent}，${document.getElementById('edge-tag').textContent}，模型 HPWL ${document.getElementById('hpwl-metric').textContent}`;
+      });
+      let swappedInstances = false;
+      let perturbOff = false;
+      function updateSeedDemo() {
+        document.getElementById('instance-sequence').textContent = swappedInstances ? 'B → A' : 'A → B';
+        document.getElementById('seed-a').textContent = perturbOff ? '0' : swappedInstances ? 'r₂' : 'r₁';
+        document.getElementById('seed-b').textContent = perturbOff ? '0' : swappedInstances ? 'r₁' : 'r₂';
+        document.getElementById('perturb-label').textContent = perturbOff ? '扰动 = 0' : '默认扰动';
+        document.getElementById('seed-caption').textContent = perturbOff ? '扰动分配差异已排除。pin / cell 的浮点归约路径仍然存在。' : '同一随机流，分配给不同实例。优化起点随遍历顺序变化。';
+        document.getElementById('toggle-perturb').textContent = perturbOff ? '恢复默认扰动' : '关闭扰动';
+        document.getElementById('toggle-perturb').setAttribute('aria-pressed', String(perturbOff));
+        document.getElementById('swap-instances').setAttribute('aria-pressed', String(swappedInstances));
+        document.getElementById('announcement').textContent = `实例 A：${document.getElementById('seed-a').textContent}，实例 B：${document.getElementById('seed-b').textContent}。${document.getElementById('seed-caption').textContent}`;
+      }
+      document.getElementById('swap-instances').addEventListener('click', () => { swappedInstances = !swappedInstances; updateSeedDemo(); });
+      document.getElementById('toggle-perturb').addEventListener('click', () => { perturbOff = !perturbOff; updateSeedDemo(); });
+      window.addEventListener('hashchange', fromHash);
+      fromHash();
+    })();
+  </script>
+</body>
+</html>
